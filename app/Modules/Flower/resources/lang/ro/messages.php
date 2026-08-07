@@ -1,0 +1,107 @@
+<?php
+
+return [
+    'title' => 'Flow-er',
+    'tagline' => 'Liste de verificare cronometrate',
+
+    'nav' => [
+        'templates' => 'Șabloane',
+    ],
+
+    'index' => [
+        'heading' => 'Șabloane',
+        'subheading' => 'Listele tale de verificare, grupate pe client și tip.',
+        'new_template' => 'Șablon nou',
+        'empty' => 'Niciun șablon încă. Creează prima listă de verificare.',
+        'no_steps' => 'Niciun pas încă',
+        'steps_count' => '{0}Niciun pas|{1}:count pas|[2,*]:count pași',
+        'runs_count' => '{0}Nicio rulare|{1}:count rulare|[2,*]:count rulări',
+        'start_run' => 'Începe rularea',
+        'edit' => 'Editează',
+        'history' => 'Istoric',
+    ],
+
+    'template' => [
+        'create_heading' => 'Șablon nou',
+        'edit_heading' => 'Editează șablonul',
+        'name' => 'Numele șablonului',
+        'name_placeholder' => 'ex. Montaj principal',
+        'client' => 'Client',
+        'client_placeholder' => 'ex. AcmeCorp',
+        'type' => 'Tip',
+        'type_placeholder' => 'ex. Podcast, Reels',
+        'save' => 'Salvează șablonul',
+        'create' => 'Creează șablonul',
+        'delete' => 'Șterge șablonul',
+        'delete_confirm' => 'Ștergi acest șablon? Rulările și istoricul vor fi ascunse.',
+        'created' => 'Șablon creat. Acum adaugă pașii.',
+        'updated' => 'Șablon salvat.',
+        'deleted' => 'Șablon șters.',
+        'back' => 'Înapoi la șabloane',
+    ],
+
+    'steps' => [
+        'heading' => 'Pași',
+        'hint' => 'Adaugă pașii în ordine. Trage pentru a reordona.',
+        'name_placeholder' => 'Numele pasului',
+        'add' => 'Adaugă pas',
+        'remove' => 'Elimină',
+        'empty' => 'Niciun pas încă — adaugă primul mai jos.',
+    ],
+
+    'run' => [
+        'heading' => 'Rulare',
+        'run_number' => 'Rularea #:number',
+        'start' => 'Începe rularea',
+        'no_steps' => 'Acest șablon nu are pași. Adaugă pași înainte de a începe.',
+        'current_step' => 'Pasul curent',
+        'elapsed' => 'Timp scurs',
+        'average' => 'Media',
+        'check' => 'Gata — pasul următor',
+        'check_last' => 'Gata — finalizează rularea',
+        'progress' => ':done din :total pași',
+        'pending' => 'În așteptare',
+        'done' => 'Finalizat',
+        'no_history' => 'fără istoric',
+        'cancel' => 'Anulează rularea',
+        'cancel_confirm' => 'Anulezi această rulare? Nu va fi salvată în istoric.',
+        'cancelled' => 'Rulare anulată.',
+    ],
+
+    'nudge' => [
+        'title' => 'Menține ritmul 🌊',
+        'body' => 'Ai depășit ritmul obișnuit pentru acest pas.',
+    ],
+
+    'summary' => [
+        'heading' => 'Rulare finalizată',
+        'subheading' => 'Cum s-a comparat această rulare cu media ta.',
+        'total' => 'Timp total',
+        'step' => 'Pas',
+        'duration' => 'Această rulare',
+        'average' => 'Media',
+        'delta' => 'Diferență',
+        'faster' => 'mai rapid',
+        'slower' => 'mai lent',
+        'start_over' => 'Începe din nou',
+        'view_history' => 'Vezi istoricul',
+        'back' => 'Înapoi la șabloane',
+    ],
+
+    'history' => [
+        'heading' => 'Istoricul rulărilor',
+        'subheading' => 'Rulările finalizate pentru :template.',
+        'empty' => 'Nicio rulare finalizată încă.',
+        'run' => 'Rulare',
+        'date' => 'Data',
+        'total' => 'Total',
+        'average_row' => 'Media',
+        'back' => 'Înapoi la șabloane',
+        'start_run' => 'Începe rularea',
+    ],
+
+    'unit' => [
+        'seconds_short' => 's',
+        'minutes_short' => 'm',
+    ],
+];
