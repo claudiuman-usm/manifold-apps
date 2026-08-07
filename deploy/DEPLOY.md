@@ -163,6 +163,35 @@ cPanel → Git Version Control → **Update from Remote**. If using the shim and
 - **DB:** phpMyAdmin → Export the database first.
 - **Rollback:** `git revert` (or reset) + push → "Update from Remote"; restore the DB export if a migration/ALTER was applied.
 
+## Automation — hands-off local push
+So you never fumble git. Two layers:
+
+**1. `git ship` — one-command add + commit + push** (global alias, works in any repo, uses that repo's own remote):
+```bash
+git config --global alias.ship '!f(){ git add -A && git commit -m "${1:-update}" && git push; }; f'
+# then, from any app folder:
+git ship "what changed"
+```
+
+**2. Auto-push on every commit** — so even an editor commit / plain `git commit` pushes itself; you never run `git push`.
+- **Per-repo** — create `.git/hooks/post-commit` (then `chmod +x`):
+  ```sh
+  #!/bin/sh
+  # Auto-push after every commit. Delete this file to disable.
+  ( git push >/tmp/manifold-autopush.log 2>&1 & )
+  echo "→ auto-pushing to GitHub in the background"
+  ```
+- **Global (all apps on this Mac)** — one hooks dir for every repo:
+  ```bash
+  mkdir -p ~/.git-hooks
+  printf '#!/bin/sh\n( git push >/tmp/autopush.log 2>&1 & )\n' > ~/.git-hooks/post-commit
+  chmod +x ~/.git-hooks/post-commit
+  git config --global core.hooksPath ~/.git-hooks
+  ```
+- Tradeoff: **every** commit pushes (fine for solo apps — WIP lands on GitHub). Disable by deleting the hook (or `git config --global --unset core.hooksPath`). Push failures log to `/tmp/…autopush.log`.
+
+**Result — the deploy loop is now:** commit (auto-pushes) → cPanel **Update from Remote** (one click). Fully automating the server pull (push → live, no click) would need a GitHub→cPanel webhook or a cPanel API token — fiddly on this no-SSH host, so the single click stays for now.
+
 ## For future apps — extra gotchas to plan for
 - **User uploads / `storage:link`:** no shell means `php artisan storage:link` can't run. For apps with uploads (receipts, migraine photos): create the symlink via a one-off cron, or serve uploads through a controller, or keep them on a non-public disk.
 - **Scheduled tasks / queues:** no daemon. Use a cPanel **Cron Job** for `schedule:run` (`* * * * *`), and keep `QUEUE_CONNECTION=sync` (or a cron-driven `queue:work --once`).

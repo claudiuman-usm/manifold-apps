@@ -533,6 +533,52 @@ table.data tfoot td { border-top: 1px solid var(--panel-border); border-bottom: 
 .delta-faster { color: var(--success); font-weight: 800; }
 .delta-slower { color: var(--warning); font-weight: 800; }
 
+/* ---- Receipts context (amber) ---- */
+body.ctx-receipts {
+    --accent: #d97706;
+    --accent-solid: #b45309;
+    --accent-2: #f59e0b;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(217, 119, 6, .14);
+    --ring: rgba(180, 83, 9, .30);
+    --page: #fdf7ee;
+    --orb-1: #fcd9a8;
+    --orb-2: #fca5a5;
+    --orb-3: #fde68a;
+}
+:root[data-theme="dark"] body.ctx-receipts {
+    --page: #161009;
+    --accent: #fbbf24;
+    --accent-solid: #fbbf24;
+    --accent-ink: #231a06;
+    --accent-soft: rgba(251, 191, 36, .16);
+    --ring: rgba(251, 191, 36, .30);
+}
+
+/* ---- Receipt cards ---- */
+.receipt-card { display: block; padding: 0; overflow: hidden; cursor: pointer; transition: transform .12s, box-shadow .14s; }
+.receipt-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.receipt-thumb { position: relative; aspect-ratio: 1 / 1; background: #fff center / cover no-repeat; }
+.receipt-badge { position: absolute; top: 10px; left: 10px; }
+.receipt-body { padding: 14px 16px; }
+
+/* ---- Add-receipt dropzone ---- */
+.receipt-dropzone {
+    border: 2px dashed var(--panel-border);
+    border-radius: var(--r-el);
+    padding: 32px 24px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--field);
+    transition: border-color .14s;
+}
+.receipt-dropzone:hover { border-color: var(--accent); }
+.receipt-dropzone img { max-width: 100%; max-height: 360px; border-radius: var(--r-el); }
+
+/* ---- Receipt detail layout ---- */
+.receipt-detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .receipt-detail { grid-template-columns: 1fr; } }
+
 @media (max-width: 720px) {
     .topbar-inner { height: auto; min-height: 58px; flex-wrap: wrap; padding: 10px 16px; gap: 8px; }
     .topbar-nav { gap: 4px; flex-wrap: wrap; }
