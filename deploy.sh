@@ -7,11 +7,14 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-# --- Resolve a PHP 8.x binary (cPanel EA-PHP first, then whatever's on PATH).
+# --- Resolve a PHP 8.x binary (CloudLinux alt-php and cPanel EA-PHP, then PATH).
 PHP=""
 for c in \
+    /opt/alt/php84/usr/bin/php \
     /opt/cpanel/ea-php84/root/usr/bin/php \
+    /opt/alt/php83/usr/bin/php \
     /opt/cpanel/ea-php83/root/usr/bin/php \
+    /opt/alt/php82/usr/bin/php \
     /opt/cpanel/ea-php82/root/usr/bin/php \
     php; do
     if command -v "$c" >/dev/null 2>&1; then PHP="$c"; break; fi
