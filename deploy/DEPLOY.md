@@ -106,7 +106,7 @@ Copy from `deploy/env.production.txt`. Set:
 - `DB_DATABASE/USERNAME/PASSWORD`, `APP_URL=https://SUBDOMAIN`, `APP_TIMEZONE`.
 - `SESSION_DRIVER=file`, `CACHE_STORE=file`, `SESSION_SECURE_COOKIE=false` (→ true after SSL).
 
-⚠️ `Unsupported cipher or incorrect key length` → `APP_KEY` lost its `base64:` prefix or has a stray space/quote.
+⚠️ `Unsupported cipher or incorrect key length` → `APP_KEY` is wrong: missing the `base64:` prefix, a stray space/quote, or **truncated on paste**. A valid key is `base64:` + **44 chars ending in `=`** (~51 total) — copy it as one whole line. If you fixed `.env` and the error persists, the config is **cached** — see Phase 7.
 ⚠️ 500 on DB pages but the login page works → wrong DB creds / user not attached; try `localhost` vs `127.0.0.1`.
 
 ## Phase 5 — Document root + the LiteSpeed shim  ⚠️ (the big one)
@@ -130,6 +130,8 @@ File Manager → in `repositories/APP`, set **`storage` and `bootstrap/cache` to
 Blank 500 hides the cause. `.env` → `APP_DEBUG=true` → reload → read the red headline (or `storage/logs/laravel.log`, writable after Phase 6) → fix → set `APP_DEBUG=false` again.
 - A **500** = PHP ran your app; only the app errored.
 - A **LiteSpeed 404** = the request never reached the app (docroot/shim, Phase 5).
+
+⚠️ **Cached config silently ignores your `.env`** (this bit us hard). If `APP_DEBUG=true` but the browser still shows the *minimal* "500 Server Error" (not the detailed page), or your `.env` edits seem to have **no effect at all**, Laravel is reading a stale `bootstrap/cache/config.php`. With no shell you can't run `php artisan config:clear`, so **delete every `.php` file in `bootstrap/cache/`** via File Manager (keep `.gitignore`), then reload. In our case a stale cache held a *truncated* `APP_KEY` + `debug=false`, so no `.env` fix could take until the cache was deleted.
 
 ## Phase 8 — HTTPS
 Test on `http://` first (before a cert, `https://` may 404 on a default vhost).
@@ -172,7 +174,8 @@ Schema changes ship as SQL → run the relevant `ALTER TABLE` in phpMyAdmin by h
 | **LiteSpeed 404 on every URL incl. `test.txt`** | Docroot change not honored by vhost | **Shim** in `SUBDOMAIN/public` (Phase 5) |
 | CSS/JS 404 with the shim | Assets only in repo's public, not served folder | Copy `public/css` (+`build`) into `SUBDOMAIN/public` |
 | `https://` 404 but `http://` works | No SSL cert yet → default vhost | Test on http; Run AutoSSL |
-| 500 `Unsupported cipher or incorrect key length` | Bad `APP_KEY` | Paste full value with `base64:`, no spaces |
+| 500 `Unsupported cipher or incorrect key length` | Bad/truncated `APP_KEY` | Paste full value (`base64:`+44 chars ending `=`), no spaces |
+| `.env` edits do nothing / generic 500 despite `APP_DEBUG=true` | Stale cached config | Delete `bootstrap/cache/*.php` (no shell → File Manager) |
 | `419 Page Expired` on submit | Can't write session files | `storage` → 775 recursive |
 | 500 on DB pages, login page fine | Wrong DB creds / user not attached | Fix `.env` DB block; `localhost` vs `127.0.0.1`; ALL PRIVILEGES |
 | `#1050 Table already exists` on import | Tables already created | Harmless; re-run only INSERTs if empty |
