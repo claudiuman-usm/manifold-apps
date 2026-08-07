@@ -9,16 +9,20 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the single hub user (idempotent). Credentials come from .env.
+     * Seed the single hub user (idempotent + safe to run on every deploy).
+     * Credentials come from .env. The password is set only when the user is
+     * first created, so re-seeding never clobbers a password you changed later.
      */
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@example.com')],
-            [
-                'name' => env('ADMIN_NAME', 'Admin'),
-                'password' => Hash::make(env('ADMIN_PASSWORD', 'password')),
-            ],
-        );
+        $user = User::firstOrNew(['email' => env('ADMIN_EMAIL', 'admin@example.com')]);
+
+        $user->name = env('ADMIN_NAME', 'Admin');
+
+        if (! $user->exists) {
+            $user->password = Hash::make(env('ADMIN_PASSWORD', 'password'));
+        }
+
+        $user->save();
     }
 }
