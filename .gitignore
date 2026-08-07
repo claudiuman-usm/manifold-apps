@@ -23,7 +23,7 @@
 /public/storage
 /storage/*.key
 /storage/pail
-/vendor
+# NOTE: vendor/ is intentionally COMMITTED for no-SSH cPanel deploys (see deploy/DEPLOY.md)
 _ide_helper.php
 Homestead.json
 Homestead.yaml

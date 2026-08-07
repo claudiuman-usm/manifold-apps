@@ -1,4 +1,4 @@
 ---
 deployment:
   tasks:
-    - /bin/bash deploy.sh
+    - /bin/chmod -R 775 storage bootstrap/cache
