@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DeployController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
+
+// No-SSH migration runner (token-guarded; see deploy/DEPLOY.md).
+Route::get('_deploy/migrate', [DeployController::class, 'migrate'])->name('deploy.migrate');
 
 // Locale + theme switches (available to guests too, so the login screen can toggle).
 Route::get('locale/{locale}', [LocaleController::class, 'switch'])->name('locale.switch');

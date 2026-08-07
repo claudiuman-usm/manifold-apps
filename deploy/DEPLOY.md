@@ -151,7 +151,13 @@ cPanel → **SSL/TLS Status** → tick SUBDOMAIN → **Run AutoSSL** → wait. T
 git add -A && git commit -m "…" && git push
 ```
 cPanel → Git Version Control → **Update from Remote**. If using the shim and CSS/build changed, **re-copy** `public/css/` (and `public/build/`) into `SUBDOMAIN/public/`.
-Schema changes ship as SQL → run the relevant `ALTER TABLE` in phpMyAdmin by hand.
+
+**Schema changes (no shell) — token-guarded migrate endpoint:**
+1. Add the Laravel migration file locally, `git ship`, then **Update from Remote**.
+2. Hit `https://SUBDOMAIN/_deploy/migrate?token=DEPLOY_TOKEN` (add `&seed=1` to also run the seeder).
+   Requires `DEPLOY_TOKEN` in `.env`; returns 404 without the correct token. Only ever runs `migrate`/`db:seed`.
+   ⚠️ The token rides in the URL (may hit access logs) — use a long random value and rotate if exposed.
+   *(Hand `ALTER TABLE` in phpMyAdmin still works as a fallback.)*
 
 **⚠️ Backup / rollback (do before risky changes):**
 - **DB:** phpMyAdmin → Export the database first.

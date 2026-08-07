@@ -50,6 +50,10 @@
         @yield('content')
     </main>
 
+    <footer style="position:relative;z-index:1;max-width:var(--maxw);margin:0 auto;padding:8px 24px 32px;text-align:center;color:var(--text-3);font-size:.78rem;">
+        {{ __('hub.app_name') }} · v{{ config('app.version', '1.0') }}
+    </footer>
+
     @stack('scripts')
 </body>
 </html>
