@@ -108,7 +108,6 @@
                         </div>
                         <div class="receipt-merchant">{{ $r->merchant ?: '—' }}</div>
                     </div>
-                    <div class="receipt-tear"></div>
                     <div class="receipt-stub">
                         <div class="receipt-amount">{{ $fmt($r->amount) }} <span class="cur">{{ $r->currency }}</span></div>
                         @if ($r->category)<span class="badge">{{ $r->category->name }}</span>@endif

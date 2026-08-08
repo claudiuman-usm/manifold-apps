@@ -59,27 +59,52 @@
         </div>
     @endif
 
-    {{-- Full checklist --}}
+    {{-- Full checklist. The active step is a checkbox you click to advance. --}}
     <ul class="run-steps">
         @foreach ($rows as $i => $row)
-            <li class="run-step {{ $row['is_done'] ? 'done' : '' }} {{ $row['is_current'] ? 'current' : '' }}">
-                <span class="marker">{{ $i + 1 }}</span>
-                <span class="name">{{ $row['step']->name }}</span>
-                <span class="meta">
-                    @if ($row['is_done'])
-                        {{ Duration::format($row['duration']) }}
-                    @elseif ($row['average'] !== null)
-                        ~{{ Duration::format($row['average']) }}
-                    @endif
-                </span>
-            </li>
+            @if ($row['is_current'])
+                <li>
+                    <form method="POST" action="{{ route('flower.runs.advance', $run) }}" class="run-step-form">
+                        @csrf
+                        <button type="submit" class="run-step current run-step-click"
+                                title="{{ $isLastStep ? __('flower::messages.run.check_last') : __('flower::messages.run.check') }}">
+                            <span class="marker check" aria-hidden="true"></span>
+                            <span class="name">{{ $row['step']->name }}</span>
+                            <span class="meta">
+                                @if ($row['average'] !== null)~{{ Duration::format($row['average']) }}@endif
+                            </span>
+                        </button>
+                    </form>
+                </li>
+            @else
+                <li class="run-step {{ $row['is_done'] ? 'done' : '' }}">
+                    <span class="marker">{{ $row['is_done'] ? '✓' : $i + 1 }}</span>
+                    <span class="name">{{ $row['step']->name }}</span>
+                    <span class="meta">
+                        @if ($row['is_done'])
+                            {{ Duration::format($row['duration']) }}
+                        @elseif ($row['average'] !== null)
+                            ~{{ Duration::format($row['average']) }}
+                        @endif
+                    </span>
+                </li>
+            @endif
         @endforeach
     </ul>
 
-    {{-- Nudge popup --}}
-    <div class="nudge" id="nudge" hidden>
-        <strong>{{ __('flower::messages.nudge.title') }}</strong>
-        <p>{{ __('flower::messages.nudge.body') }}</p>
+    {{-- Nudge — phone-style glass toast that slides in from the top --}}
+    <div class="nudge-toast" id="nudge">
+        <div class="nudge-toast-text">
+            <strong>{{ __('flower::messages.nudge.title') }}</strong>
+            <span>{{ __('flower::messages.nudge.body') }}</span>
+        </div>
+        <form method="POST" action="{{ route('flower.runs.advance', $run) }}">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-primary">
+                @if ($isLastStep) {{ __('flower::messages.run.check_last') }}
+                @else {{ __('flower::messages.run.check') }} @endif
+            </button>
+        </form>
     </div>
 @endsection
 
@@ -107,7 +132,7 @@
 
         const over = threshold !== null && elapsed > threshold;
         clock.classList.toggle('over', over);
-        nudge.hidden = !over;
+        if (nudge) nudge.classList.toggle('show', over);
     }
 
     tick();

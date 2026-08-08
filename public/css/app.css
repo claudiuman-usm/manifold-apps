@@ -511,22 +511,40 @@ table.data tfoot td { border-top: 1px solid var(--panel-border); border-bottom: 
 .run-step.current .marker { border-color: var(--accent); color: var(--accent); }
 .run-step.current .name { font-weight: 800; }
 
-/* ---- Nudge popup ---- */
-.nudge {
-    position: fixed; right: 24px; bottom: 24px; max-width: 320px;
+/* Active step is a checkbox you click to advance. */
+.run-step-form { margin: 0; }
+.run-step-click { width: 100%; font: inherit; text-align: left; cursor: pointer; appearance: none; -webkit-appearance: none; transition: border-color .14s, background .14s, transform .12s, box-shadow .14s; }
+.run-step-click .marker.check { position: relative; }
+.run-step-click .marker.check::after { content: "✓"; font-size: .8rem; font-weight: 800; opacity: 0; transition: opacity .12s; }
+.run-step-click:hover { transform: scale(1.01); box-shadow: 0 0 0 1px var(--accent) inset, var(--shadow); }
+.run-step-click:hover .marker.check { background: var(--accent); border-color: var(--accent); }
+.run-step-click:hover .marker.check::after { opacity: 1; color: var(--accent-ink); }
+.run-step-click:active { transform: scale(.995); }
+
+/* ---- Nudge — phone-style glass toast, slides in from the top ---- */
+.nudge-toast {
+    position: fixed; top: 78px; left: 50%; /* clears the 64px sticky header */
+    transform: translate(-50%, -220%);
+    width: min(440px, calc(100% - 28px));
+    display: flex; align-items: center; gap: 14px;
     background: var(--panel-strong);
     backdrop-filter: blur(var(--blur)) saturate(1.6);
     -webkit-backdrop-filter: blur(var(--blur)) saturate(1.6);
     border: 1px solid var(--panel-border);
-    border-left: 4px solid var(--warning);
     border-radius: var(--r-el);
     box-shadow: var(--shadow-pop);
-    padding: 16px 18px; z-index: 50;
-    animation: nudge-in .24s ease-out;
+    padding: 12px 14px 12px 16px; z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: transform .34s cubic-bezier(.2, .8, .2, 1), opacity .28s ease;
 }
-.nudge[hidden] { display: none; }
-.nudge strong { display: block; margin-bottom: 4px; font-size: .98rem; font-weight: 800; }
-.nudge p { margin: 0; font-size: .87rem; color: var(--text-2); font-weight: 500; }
+.nudge-toast.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.nudge-toast-text { flex: 1; min-width: 0; }
+.nudge-toast-text strong { display: block; font-size: .92rem; font-weight: 800; }
+.nudge-toast-text span { font-size: .82rem; color: var(--text-2); font-weight: 500; }
+.nudge-toast form { flex: none; margin: 0; }
+@media (prefers-reduced-motion: reduce) {
+    .nudge-toast { transition: opacity .2s ease; transform: translate(-50%, 0); }
+}
 @keyframes nudge-in { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* ---- Summary deltas ---- */
@@ -556,25 +574,35 @@ body.ctx-receipts {
 }
 
 /* ---- Receipt cards (ticket / stub look, no image) ---- */
-.receipt-card { position: relative; display: flex; flex-direction: column; padding: 0; overflow: visible; cursor: pointer; transition: transform .12s, box-shadow .14s; }
-.receipt-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+/* Notches are real transparent cut-outs punched with a mask so the page shows
+   through — no fill, no border. Radius `--stub-h` keeps them on the tear line.
+   drop-shadow (not box-shadow) is used so the shadow follows the notched edge. */
+.receipt-card {
+    --notch: 11px;
+    --stub-h: 60px;
+    position: relative; display: flex; flex-direction: column; padding: 0;
+    overflow: visible; cursor: pointer;
+    box-shadow: none;
+    filter: drop-shadow(0 1px 2px rgba(20, 18, 30, .05));
+    transition: transform .12s, filter .14s;
+    -webkit-mask:
+        radial-gradient(circle var(--notch) at left calc(100% - var(--stub-h)), #0000 calc(var(--notch) - .5px), #000 var(--notch)) left / 50.5% 100% no-repeat,
+        radial-gradient(circle var(--notch) at right calc(100% - var(--stub-h)), #0000 calc(var(--notch) - .5px), #000 var(--notch)) right / 50.5% 100% no-repeat;
+    mask:
+        radial-gradient(circle var(--notch) at left calc(100% - var(--stub-h)), #0000 calc(var(--notch) - .5px), #000 var(--notch)) left / 50.5% 100% no-repeat,
+        radial-gradient(circle var(--notch) at right calc(100% - var(--stub-h)), #0000 calc(var(--notch) - .5px), #000 var(--notch)) right / 50.5% 100% no-repeat;
+}
+.receipt-card:hover { transform: translateY(-3px); filter: drop-shadow(0 10px 20px rgba(20, 18, 30, .12)); }
 
 .receipt-top { padding: 16px 18px 15px; }
 .receipt-eyebrow { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); font-weight: 800; }
 .receipt-merchant { font-size: 1.04rem; font-weight: 700; line-height: 1.25; margin-top: 8px; }
 
-/* Tear line with side notches punched at the card edges. */
-.receipt-tear { position: relative; height: 0; margin: 0 16px; border-top: 2px dashed var(--panel-border); }
-.receipt-tear::before, .receipt-tear::after {
-    content: ""; position: absolute; top: -9px; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--page); border: 1px solid var(--panel-border);
-}
-.receipt-tear::before { left: -25px; }
-.receipt-tear::after { right: -25px; }
-
 .receipt-stub {
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 15px 18px 17px; border-radius: 0 0 var(--r-card) var(--r-card);
+    height: var(--stub-h); box-sizing: border-box; padding: 0 18px;
+    border-top: 2px dashed var(--panel-border);
+    border-radius: 0 0 var(--r-card) var(--r-card);
     background: var(--accent-soft);
 }
 .receipt-amount { font-size: 1.5rem; font-weight: 300; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text); }
