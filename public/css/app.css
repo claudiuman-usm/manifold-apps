@@ -594,7 +594,10 @@ body.ctx-receipts {
 }
 .receipt-card:hover { transform: translateY(-3px); filter: drop-shadow(0 10px 20px rgba(20, 18, 30, .12)); }
 
-.receipt-top { padding: 16px 18px 15px; }
+/* Fill the grid cell so every card in a row is equal height; the top grows so
+   the stub (and its notch line) always sits at the bottom. */
+.receipt-card { height: 100%; }
+.receipt-top { flex: 1 1 auto; padding: 16px 18px 15px; }
 .receipt-eyebrow { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); font-weight: 800; }
 .receipt-merchant { font-size: 1.04rem; font-weight: 700; line-height: 1.25; margin-top: 8px; }
 
