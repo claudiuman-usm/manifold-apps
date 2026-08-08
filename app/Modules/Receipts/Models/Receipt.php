@@ -14,7 +14,7 @@ class Receipt extends Model
 
     protected $fillable = [
         'original_path', 'image_path', 'merchant', 'amount', 'currency',
-        'purchased_at', 'category_id', 'notes', 'status',
+        'purchased_at', 'category_id', 'client_id', 'allocation_id', 'notes', 'status',
     ];
 
     protected $casts = [
@@ -25,5 +25,15 @@ class Receipt extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'client_id');
+    }
+
+    public function allocation(): BelongsTo
+    {
+        return $this->belongsTo(Allocation::class, 'allocation_id');
     }
 }
