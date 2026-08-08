@@ -10,4 +10,11 @@ return [
     // Anthropic API key. When empty, uploads still work — extraction is skipped
     // and the receipt lands in "review" for manual entry.
     'api_key' => env('ANTHROPIC_API_KEY'),
+
+    // Issuing company shown on the allocation PDF that goes to the accountant.
+    'company' => [
+        'name' => env('RECEIPTS_COMPANY_NAME', 'Usmile Media SRL'),
+        'cui' => env('RECEIPTS_COMPANY_CUI', 'RO36448669'),
+        'address' => env('RECEIPTS_COMPANY_ADDRESS', 'Graurului 7/34, Brașov, Romania'),
+    ],
 ];

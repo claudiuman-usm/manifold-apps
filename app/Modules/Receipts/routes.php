@@ -29,6 +29,7 @@ Route::delete('clients/{client}', [ClientController::class, 'destroy'])->name('c
 Route::get('allocations', [AllocationController::class, 'index'])->name('allocations.index');
 Route::get('allocations/create', [AllocationController::class, 'create'])->name('allocations.create');
 Route::post('allocations', [AllocationController::class, 'store'])->name('allocations.store');
+Route::post('allocations/preview', [AllocationController::class, 'preview'])->name('allocations.preview');
 Route::get('allocations/{allocation}', [AllocationController::class, 'show'])->name('allocations.show');
 Route::put('allocations/{allocation}', [AllocationController::class, 'update'])->name('allocations.update');
 Route::delete('allocations/{allocation}', [AllocationController::class, 'destroy'])->name('allocations.destroy');

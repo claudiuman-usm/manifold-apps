@@ -6,59 +6,74 @@
     <style>
         * { font-family: "DejaVu Sans", sans-serif; }
         body { color: #1a1a1a; font-size: 12px; margin: 0; }
-        .head { border-bottom: 2px solid #b45309; padding-bottom: 12px; margin-bottom: 18px; }
-        .brand { color: #b45309; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
-        h1 { font-size: 20px; margin: 6px 0 2px; }
-        .meta { color: #555; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 14px; }
-        th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: #777;
-             border-bottom: 1px solid #ccc; padding: 6px 8px; }
-        td { padding: 7px 8px; border-bottom: 1px solid #eee; }
-        .r { text-align: right; }
-        .total-row td { border-top: 2px solid #333; border-bottom: none; font-weight: bold; font-size: 14px; padding-top: 10px; }
-        .notes { margin-top: 20px; color: #555; font-size: 11px; white-space: pre-line; }
-        .foot { margin-top: 28px; color: #999; font-size: 10px; }
+        .head { border-bottom: 3px solid #d9531e; padding-bottom: 14px; margin-bottom: 20px; }
+        .head td { vertical-align: top; }
+        .company { font-size: 20px; font-weight: bold; }
+        .company-meta { color: #333; font-size: 12px; line-height: 1.5; }
+        .date { color: #333; font-size: 12px; text-align: right; }
+        .intro { font-size: 13px; line-height: 1.5; margin: 4px 0 22px; }
+        table.items { width: 100%; border-collapse: collapse; }
+        table.items th {
+            background: #d9531e; color: #fff; text-align: left;
+            padding: 9px 10px; font-size: 11px;
+        }
+        table.items th.r, table.items td.r { text-align: right; }
+        table.items td { padding: 9px 10px; }
+        table.items tbody tr:nth-child(odd) { background: #fdf3ec; }
+        .total td { background: #d9531e; color: #fff; font-weight: bold; font-size: 13px; padding: 10px; }
+        .foot { margin-top: 30px; color: #999; font-size: 10px; }
     </style>
 </head>
 <body>
-    <div class="head">
-        <div class="brand">{{ $appName }} · {{ __('receipts::messages.allocations.heading') }}</div>
-        <h1>{{ $allocation->title }}</h1>
-        <div class="meta">
-            {{ $allocation->client?->name }}@if ($allocation->client?->email) · {{ $allocation->client->email }}@endif<br>
-            @if ($allocation->period_month){{ $allocation->period_month->translatedFormat('F Y') }} · @endif{{ now()->format('d M Y') }}
-        </div>
-    </div>
+    <table style="width:100%; border-collapse:collapse;" class="head">
+        <tr>
+            <td>
+                <div class="company">{{ $company['name'] }}</div>
+                <div class="company-meta">
+                    CUI: {{ $company['cui'] }}<br>
+                    {{ $company['address'] }}
+                </div>
+            </td>
+            <td class="date">Data: {{ now()->format('d.m.Y') }}</td>
+        </tr>
+    </table>
 
-    <table>
+    <p class="intro">
+        Documentele fiscale din tabelul alăturat sunt alocate ca și cheltuieli facturii fiscale
+        <strong>{{ $invoiceNumber }}</strong>@if ($client) pentru Clientul <strong>{{ $client->name }}</strong>@endif.
+    </p>
+
+    <table class="items">
         <thead>
             <tr>
-                <th>{{ __('receipts::messages.show.date') }}</th>
-                <th>{{ __('receipts::messages.show.merchant') }}</th>
-                <th>{{ __('receipts::messages.show.category') }}</th>
-                <th class="r">{{ __('receipts::messages.show.amount') }}</th>
+                <th style="width:34px;">#</th>
+                <th>Furnizor</th>
+                <th style="width:80px;">Data</th>
+                <th style="width:120px;">Categorie</th>
+                <th class="r" style="width:90px;">Sumă</th>
+                <th style="width:60px;">Monedă</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($allocation->receipts as $r)
+            @foreach ($receipts as $i => $r)
                 <tr>
-                    <td>{{ optional($r->purchased_at)->format('Y-m-d') ?: '—' }}</td>
+                    <td>{{ $i + 1 }}</td>
                     <td>{{ $r->merchant ?: '—' }}</td>
+                    <td>{{ optional($r->purchased_at)->format('d.m.y') ?: '—' }}</td>
                     <td>{{ $r->category?->name ?: '—' }}</td>
-                    <td class="r">{{ $fmt($r->amount) }} {{ $r->currency }}</td>
+                    <td class="r">{{ $fmt($r->amount) }}</td>
+                    <td>{{ $r->currency }}</td>
                 </tr>
             @endforeach
-            <tr class="total-row">
-                <td colspan="3">{{ __('receipts::messages.allocations.total') }}</td>
-                <td class="r">{{ $fmt($total) }} {{ $baseCurrency }}</td>
+            <tr class="total">
+                <td colspan="3"></td>
+                <td>TOTAL</td>
+                <td class="r">{{ $fmt($total) }}</td>
+                <td>{{ $baseCurrency }}</td>
             </tr>
         </tbody>
     </table>
 
-    @if ($allocation->notes)
-        <div class="notes">{{ $allocation->notes }}</div>
-    @endif
-
-    <div class="foot">{{ $appName }} — {{ now()->format('Y-m-d H:i') }}</div>
+    <div class="foot">{{ $company['name'] }} — {{ now()->format('Y-m-d H:i') }}</div>
 </body>
 </html>

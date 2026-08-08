@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', $allocation->title)
+@section('title', $allocation->invoice_number)
 @section('bodyClass', 'ctx-receipts')
 @php($fmt = fn ($n) => number_format((float) $n, 2))
 
@@ -11,12 +11,12 @@
         <span class="sep">/</span>
         <a href="{{ route('receipts.allocations.index') }}">{{ __('receipts::messages.allocations.heading') }}</a>
         <span class="sep">/</span>
-        <span>{{ $allocation->title }}</span>
+        <span>{{ $allocation->invoice_number }}</span>
     </div>
 
     <div class="row-between page-head">
         <div>
-            <h1>{{ $allocation->title }}</h1>
+            <h1>{{ $allocation->invoice_number }}</h1>
             <p>{{ $allocation->client?->name }} · {{ optional($allocation->period_month)->translatedFormat('F Y') ?: '—' }}</p>
         </div>
         <div class="flex gap-sm">

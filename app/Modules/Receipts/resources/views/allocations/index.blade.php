@@ -28,7 +28,7 @@
                 <table class="data">
                     <thead>
                         <tr>
-                            <th>{{ __('receipts::messages.allocations.title') }}</th>
+                            <th>{{ __('receipts::messages.allocations.invoice_number') }}</th>
                             <th>{{ __('receipts::messages.allocations.client') }}</th>
                             <th>{{ __('receipts::messages.allocations.period') }}</th>
                             <th style="text-align:right;">{{ __('receipts::messages.allocations.receipts') }}</th>
@@ -39,7 +39,7 @@
                     <tbody>
                         @foreach ($allocations as $a)
                             <tr>
-                                <td style="font-weight:600;"><a href="{{ route('receipts.allocations.show', $a) }}">{{ $a->title }}</a></td>
+                                <td style="font-weight:600;"><a href="{{ route('receipts.allocations.show', $a) }}">{{ $a->invoice_number }}</a></td>
                                 <td>{{ $a->client?->name ?: '—' }}</td>
                                 <td class="muted">{{ optional($a->period_month)->translatedFormat('F Y') ?: '—' }}</td>
                                 <td class="num" style="text-align:right;">{{ $a->receipts_count }}</td>

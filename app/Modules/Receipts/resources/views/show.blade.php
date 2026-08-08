@@ -76,6 +76,13 @@
                     </select>
                 </div>
 
+                @if ($receipt->allocation)
+                    <div class="form-row">
+                        <label>{{ __('receipts::messages.show.allocated_to') }}</label>
+                        <a href="{{ route('receipts.allocations.show', $receipt->allocation) }}" class="badge">{{ $receipt->allocation->invoice_number }}</a>
+                    </div>
+                @endif
+
                 <div class="form-row">
                     <label for="notes">{{ __('receipts::messages.show.notes') }}</label>
                     <textarea id="notes" name="notes" class="input" rows="2">{{ old('notes', $receipt->notes) }}</textarea>

@@ -148,7 +148,7 @@ class ReceiptController extends Controller
 
     public function show(Receipt $receipt): View
     {
-        $receipt->load('category', 'client');
+        $receipt->load('category', 'client', 'allocation');
 
         return view('receipts::show', [
             'receipt' => $receipt,

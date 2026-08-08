@@ -13,7 +13,7 @@ class Allocation extends Model
 
     protected $table = 'receipt_allocations';
 
-    protected $fillable = ['client_id', 'title', 'period_month', 'notes'];
+    protected $fillable = ['client_id', 'invoice_number', 'title', 'period_month', 'notes'];
 
     protected $casts = [
         'period_month' => 'date',
