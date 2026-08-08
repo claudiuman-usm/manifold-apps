@@ -96,23 +96,22 @@
     @if ($receipts->isEmpty())
         <div class="empty-state card card-pad">{{ __('receipts::messages.index.empty') }}</div>
     @else
-        <div class="tools-grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));">
+        <div class="tools-grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
             @foreach ($receipts as $r)
                 <a href="{{ route('receipts.show', $r) }}" class="card receipt-card">
-                    <div class="receipt-thumb" style="background-image:url('{{ route('receipts.image', [$r, 'square']) }}')">
-                        @if ($r->status === 'review')
-                            <span class="badge badge-warning receipt-badge">{{ __('receipts::messages.status.review') }}</span>
-                        @endif
+                    <div class="receipt-top">
+                        <div class="row-between" style="align-items:center;">
+                            <span class="receipt-eyebrow">{{ optional($r->purchased_at)->format('d M Y') ?: '—' }}</span>
+                            @if ($r->status === 'review')
+                                <span class="badge badge-warning">{{ __('receipts::messages.status.review') }}</span>
+                            @endif
+                        </div>
+                        <div class="receipt-merchant">{{ $r->merchant ?: '—' }}</div>
                     </div>
-                    <div class="receipt-body">
-                        <div class="row-between">
-                            <strong>{{ $r->merchant ?: '—' }}</strong>
-                            <span class="num">{{ $fmt($r->amount) }} <span class="faint">{{ $r->currency }}</span></span>
-                        </div>
-                        <div class="flex gap-sm" style="margin-top:6px;font-size:.82rem;">
-                            <span class="muted">{{ optional($r->purchased_at)->format('d M Y') ?: '—' }}</span>
-                            @if ($r->category)<span class="badge">{{ $r->category->name }}</span>@endif
-                        </div>
+                    <div class="receipt-tear"></div>
+                    <div class="receipt-stub">
+                        <div class="receipt-amount">{{ $fmt($r->amount) }} <span class="cur">{{ $r->currency }}</span></div>
+                        @if ($r->category)<span class="badge">{{ $r->category->name }}</span>@endif
                     </div>
                 </a>
             @endforeach

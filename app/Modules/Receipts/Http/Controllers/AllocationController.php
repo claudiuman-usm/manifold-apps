@@ -59,7 +59,7 @@ class AllocationController extends Controller
         ]);
     }
 
-    public function store(Request $request): Response
+    public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'invoice_number' => ['required', 'string', 'max:255'],
@@ -80,10 +80,9 @@ class AllocationController extends Controller
             ->whereNull('allocation_id')
             ->update(['allocation_id' => $allocation->id, 'client_id' => $allocation->client_id]);
 
-        $allocation->load(['client', 'receipts' => fn ($q) => $q->with('category')->orderBy('purchased_at')]);
-
-        return $this->makePdf($allocation->invoice_number, $allocation->client, $allocation->period_month, $allocation->receipts)
-            ->download($this->filename($allocation->invoice_number));
+        // Redirect to a plain GET download — reliable filename/content-type across
+        // servers (a file streamed from a POST response gets named after the URL).
+        return redirect()->route('receipts.allocations.pdf', ['allocation' => $allocation, 'download' => 1]);
     }
 
     /** Render a PDF from the form without saving anything. */
@@ -176,12 +175,14 @@ class AllocationController extends Controller
             ->with('status', __('receipts::messages.allocations.flash.deleted'));
     }
 
-    public function pdf(Allocation $allocation): Response
+    public function pdf(Request $request, Allocation $allocation): Response
     {
         $allocation->load(['client', 'receipts' => fn ($q) => $q->with('category')->orderBy('purchased_at')]);
 
-        return $this->makePdf($allocation->invoice_number, $allocation->client, $allocation->period_month, $allocation->receipts)
-            ->stream($this->filename($allocation->invoice_number));
+        $pdf = $this->makePdf($allocation->invoice_number, $allocation->client, $allocation->period_month, $allocation->receipts);
+        $filename = $this->filename($allocation->invoice_number);
+
+        return $request->boolean('download') ? $pdf->download($filename) : $pdf->stream($filename);
     }
 
     protected function makePdf(?string $invoiceNumber, ?Client $client, ?Carbon $periodMonth, Collection $receipts): DomPDF

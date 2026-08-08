@@ -555,12 +555,30 @@ body.ctx-receipts {
     --ring: rgba(251, 191, 36, .30);
 }
 
-/* ---- Receipt cards ---- */
-.receipt-card { display: block; padding: 0; overflow: hidden; cursor: pointer; transition: transform .12s, box-shadow .14s; }
+/* ---- Receipt cards (ticket / stub look, no image) ---- */
+.receipt-card { position: relative; display: flex; flex-direction: column; padding: 0; overflow: visible; cursor: pointer; transition: transform .12s, box-shadow .14s; }
 .receipt-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-.receipt-thumb { position: relative; aspect-ratio: 1 / 1; background: #fff center / cover no-repeat; }
-.receipt-badge { position: absolute; top: 10px; left: 10px; }
-.receipt-body { padding: 14px 16px; }
+
+.receipt-top { padding: 16px 18px 15px; }
+.receipt-eyebrow { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); font-weight: 800; }
+.receipt-merchant { font-size: 1.04rem; font-weight: 700; line-height: 1.25; margin-top: 8px; }
+
+/* Tear line with side notches punched at the card edges. */
+.receipt-tear { position: relative; height: 0; margin: 0 16px; border-top: 2px dashed var(--panel-border); }
+.receipt-tear::before, .receipt-tear::after {
+    content: ""; position: absolute; top: -9px; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--page); border: 1px solid var(--panel-border);
+}
+.receipt-tear::before { left: -25px; }
+.receipt-tear::after { right: -25px; }
+
+.receipt-stub {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 15px 18px 17px; border-radius: 0 0 var(--r-card) var(--r-card);
+    background: var(--accent-soft);
+}
+.receipt-amount { font-size: 1.5rem; font-weight: 300; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text); }
+.receipt-amount .cur { font-size: .78rem; font-weight: 700; color: var(--text-3); letter-spacing: .02em; }
 
 /* ---- Add-receipt dropzone ---- */
 .receipt-dropzone {
