@@ -67,6 +67,16 @@
                 </div>
 
                 <div class="form-row">
+                    <label for="client_id">{{ __('receipts::messages.show.client') }}</label>
+                    <select id="client_id" name="client_id" class="select">
+                        <option value="">{{ __('receipts::messages.show.client_none') }}</option>
+                        @foreach ($clients as $c)
+                            <option value="{{ $c->id }}" @selected((int) old('client_id', $receipt->client_id) === $c->id)>{{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-row">
                     <label for="notes">{{ __('receipts::messages.show.notes') }}</label>
                     <textarea id="notes" name="notes" class="input" rows="2">{{ old('notes', $receipt->notes) }}</textarea>
                 </div>

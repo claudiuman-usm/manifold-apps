@@ -19,7 +19,12 @@
             <h1>{{ __('receipts::messages.index.heading') }}</h1>
             <p>{{ __('receipts::messages.index.subheading') }}</p>
         </div>
-        <a href="{{ route('receipts.create') }}" class="btn btn-primary">+ {{ __('receipts::messages.index.add') }}</a>
+        <div class="flex gap-sm" style="flex-wrap:wrap;">
+            <a href="{{ route('receipts.clients.index') }}" class="btn btn-ghost">{{ __('receipts::messages.nav.clients') }}</a>
+            <a href="{{ route('receipts.allocations.index') }}" class="btn btn-ghost">{{ __('receipts::messages.nav.allocations') }}</a>
+            <a href="{{ route('receipts.export', request()->only('q', 'category', 'month')) }}" class="btn btn-ghost">{{ __('receipts::messages.nav.export') }}</a>
+            <a href="{{ route('receipts.create') }}" class="btn btn-primary">+ {{ __('receipts::messages.index.add') }}</a>
+        </div>
     </div>
 
     {{-- Dashboard: month total + category donut --}}

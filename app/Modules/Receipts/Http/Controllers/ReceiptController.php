@@ -4,6 +4,7 @@ namespace App\Modules\Receipts\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Receipts\Models\Category;
+use App\Modules\Receipts\Models\Client;
 use App\Modules\Receipts\Models\Receipt;
 use App\Modules\Receipts\Support\ReceiptExtractor;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +13,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReceiptController extends Controller
 {
@@ -65,6 +67,43 @@ class ReceiptController extends Controller
         return view('receipts::create');
     }
 
+    public function export(Request $request): StreamedResponse
+    {
+        $query = Receipt::query()->with(['category', 'client'])->latest('purchased_at')->latest('id');
+
+        if ($search = trim((string) $request->query('q', ''))) {
+            $query->where('merchant', 'like', "%{$search}%");
+        }
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->integer('category'));
+        }
+        $month = $request->query('month');
+        if ($month && $month !== 'all' && preg_match('/^\d{4}-\d{2}$/', $month)) {
+            $m = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $query->whereBetween('purchased_at', [$m->copy()->startOfMonth(), $m->copy()->endOfMonth()]);
+        }
+
+        $receipts = $query->get();
+
+        return response()->streamDownload(function () use ($receipts) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Date', 'Merchant', 'Amount', 'Currency', 'Category', 'Client', 'Status', 'Notes']);
+            foreach ($receipts as $r) {
+                fputcsv($out, [
+                    optional($r->purchased_at)->format('Y-m-d'),
+                    $r->merchant,
+                    $r->amount,
+                    $r->currency,
+                    $r->category?->name,
+                    $r->client?->name,
+                    $r->status,
+                    $r->notes,
+                ]);
+            }
+            fclose($out);
+        }, 'receipts-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv']);
+    }
+
     public function store(Request $request, ReceiptExtractor $extractor): RedirectResponse
     {
         $request->validate([
@@ -109,11 +148,12 @@ class ReceiptController extends Controller
 
     public function show(Receipt $receipt): View
     {
-        $receipt->load('category');
+        $receipt->load('category', 'client');
 
         return view('receipts::show', [
             'receipt' => $receipt,
             'categories' => Category::orderBy('name')->get(),
+            'clients' => Client::orderBy('name')->get(),
             'baseCurrency' => config('receipts.base_currency', 'RON'),
         ]);
     }
@@ -126,6 +166,7 @@ class ReceiptController extends Controller
             'currency' => ['required', 'string', 'size:3'],
             'purchased_at' => ['nullable', 'date'],
             'category_id' => ['nullable', 'integer', 'exists:receipt_categories,id'],
+            'client_id' => ['nullable', 'integer', 'exists:receipt_clients,id'],
             'notes' => ['nullable', 'string'],
         ]);
 
