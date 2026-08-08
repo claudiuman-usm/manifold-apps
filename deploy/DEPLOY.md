@@ -119,7 +119,7 @@ Copy from `deploy/env.production.txt`. Set:
 1. Docroot → `/home/USER/SUBDOMAIN/public` (the folder LiteSpeed actually serves).
 2. Put `deploy/public-shim/index.php` at `/home/USER/SUBDOMAIN/public/index.php` (boots the app in `repositories/APP`).
 3. Put stock `deploy/public-shim/.htaccess` there too.
-4. ⚠️ **Static assets:** the shim only serves the front controller — **copy the app's `public/css/`** (and `public/build/` if any) into `SUBDOMAIN/public/`. On CSS/asset changes, re-copy (see Phase 10). SSL also works now because `.well-known` lands in the served folder.
+4. ✅ **Static assets are served through the app** — the stylesheet is behind a Laravel route (`assets/app.css` → `AssetController`), so a request for it falls through the shim to `index.php` and is streamed from the repo's own `public/`. **Nothing to copy into the shim folder** beyond `index.php` + `.htaccess`; asset changes ship with a plain `git pull`. (For a Vite app, add a route for `public/build` the same way, or copy `build/` once.) SSL also works because `.well-known` lands in the served folder.
 
 ## Phase 6 — Permissions
 File Manager → in `repositories/APP`, set **`storage` and `bootstrap/cache` to 775, recursive** (tick "Recurse into subdirectories").
@@ -146,11 +146,11 @@ cPanel → **SSL/TLS Status** → tick SUBDOMAIN → **Run AutoSSL** → wait. T
 - [ ] Smoke test: login, a DB-backed page, a form submit
 
 ## Phase 10 — Deploying updates + rollback
-**Update:**
+**Update = pull + (migrate if schema changed). Nothing else.**
 ```bash
-git add -A && git commit -m "…" && git push
+git add -A && git commit -m "…" && git push      # or: git ship "…"
 ```
-cPanel → Git Version Control → **Update from Remote**. If using the shim and CSS/build changed, **re-copy** `public/css/` (and `public/build/`) into `SUBDOMAIN/public/`.
+Then in cPanel: **Git Version Control → Update from Remote**. That's it for code, views, and CSS — the stylesheet is served through the app (Phase 5 step 4), so no asset copying. If the change added migrations, also hit the migrate endpoint below. `.env` secrets (new API keys, etc.) are the only thing you add by hand, and only once.
 
 **Schema changes (no shell) — token-guarded migrate endpoint:**
 1. Add the Laravel migration file locally, `git ship`, then **Update from Remote**.
@@ -207,7 +207,7 @@ git ship "what changed"
 | cPanel `"" is not a valid "branch"` | Repo cloned while empty | Push first, then re-clone |
 | "directory already contains files" (returns) | A Git entry still owns the path | Remove all Git entries; clone fresh path |
 | **LiteSpeed 404 on every URL incl. `test.txt`** | Docroot change not honored by vhost | **Shim** in `SUBDOMAIN/public` (Phase 5) |
-| CSS/JS 404 with the shim | Assets only in repo's public, not served folder | Copy `public/css` (+`build`) into `SUBDOMAIN/public` |
+| CSS not updating with the shim | Stylesheet was a static copy in the served folder | Serve it through the app (`assets/app.css` route) so `git pull` updates it — no copy (Phase 5 step 4) |
 | `https://` 404 but `http://` works | No SSL cert yet → default vhost | Test on http; Run AutoSSL |
 | 500 `Unsupported cipher or incorrect key length` | Bad/truncated `APP_KEY` | Paste full value (`base64:`+44 chars ending `=`), no spaces |
 | `.env` edits do nothing / generic 500 despite `APP_DEBUG=true` | Stale cached config | Delete `bootstrap/cache/*.php` (no shell → File Manager) |

@@ -7,7 +7,7 @@
     <meta name="color-scheme" content="light dark">
     <title>@yield('title', __('hub.app_name')) · {{ __('hub.app_name') }}</title>
     @include('partials.favicon', ['ctx' => trim($__env->yieldContent('bodyClass', 'ctx-hub'))])
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
+    <link rel="stylesheet" href="{{ route('assets.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     @stack('head')
 </head>
 <body class="@yield('bodyClass', 'ctx-hub')">

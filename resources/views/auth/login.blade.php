@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="light dark">
     <title>{{ __('hub.auth.sign_in') }} · {{ __('hub.app_name') }}</title>
     @include('partials.favicon', ['ctx' => 'ctx-flower'])
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
+    <link rel="stylesheet" href="{{ route('assets.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
 </head>
 <body class="ctx-flower">
     <div class="bg-decor" aria-hidden="true">

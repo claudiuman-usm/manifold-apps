@@ -1,11 +1,16 @@
 <?php
 
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeployController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
+
+// Stylesheet served through the app so `git pull` alone updates it (no asset
+// copy into the shim's served folder). Public — the login page needs it.
+Route::get('assets/app.css', [AssetController::class, 'css'])->name('assets.css');
 
 // No-SSH migration runner (token-guarded; see deploy/DEPLOY.md).
 Route::get('_deploy/migrate', [DeployController::class, 'migrate'])->name('deploy.migrate');
