@@ -187,6 +187,13 @@ class AllocationController extends Controller
 
     protected function makePdf(?string $invoiceNumber, ?Client $client, ?Carbon $periodMonth, Collection $receipts): DomPDF
     {
+        // Keep DomPDF's temp/font dirs inside the app so shared hosts with an
+        // open_basedir restriction (no /tmp access) can still render PDFs.
+        $work = storage_path('app/dompdf');
+        if (! is_dir($work)) {
+            @mkdir($work, 0775, true);
+        }
+
         return Pdf::loadView('receipts::allocations.pdf', [
             'invoiceNumber' => $invoiceNumber,
             'client' => $client,
@@ -195,7 +202,12 @@ class AllocationController extends Controller
             'total' => $receipts->sum('amount'),
             'baseCurrency' => config('receipts.base_currency', 'RON'),
             'company' => config('receipts.company'),
-        ])->setPaper('a4');
+        ])->setPaper('a4')->setOption([
+            'tempDir' => $work,
+            'fontDir' => $work,
+            'fontCache' => $work,
+            'chroot' => base_path(),
+        ]);
     }
 
     protected function month(?string $value): ?Carbon
