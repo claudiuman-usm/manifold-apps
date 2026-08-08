@@ -45,6 +45,7 @@ class AllocationController extends Controller
         // Month options for the client-side filter (distinct receipt months + now).
         $months = $candidates
             ->map(fn (Receipt $r) => optional($r->purchased_at)->format('Y-m'))
+            ->toBase()
             ->filter()
             ->push(now()->format('Y-m'))
             ->unique()->sortDesc()->values();
