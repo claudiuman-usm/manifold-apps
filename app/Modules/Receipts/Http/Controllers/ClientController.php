@@ -65,7 +65,6 @@ class ClientController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string'],
         ]);
     }

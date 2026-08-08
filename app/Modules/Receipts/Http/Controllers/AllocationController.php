@@ -72,6 +72,7 @@ class AllocationController extends Controller
         $allocation = Allocation::create([
             'client_id' => $data['client_id'],
             'invoice_number' => $data['invoice_number'],
+            'title' => $data['invoice_number'], // legacy NOT NULL column, kept in sync
             'period_month' => $this->month($data['period_month'] ?? null),
         ]);
 
@@ -132,6 +133,7 @@ class AllocationController extends Controller
 
         $allocation->update([
             'invoice_number' => $data['invoice_number'],
+            'title' => $data['invoice_number'], // legacy NOT NULL column, kept in sync
             'period_month' => $this->month($data['period_month'] ?? null),
             'notes' => $data['notes'] ?? null,
         ]);

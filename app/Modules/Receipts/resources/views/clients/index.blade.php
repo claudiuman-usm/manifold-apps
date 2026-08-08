@@ -28,7 +28,6 @@
                     <thead>
                         <tr>
                             <th>{{ __('receipts::messages.clients.name') }}</th>
-                            <th>{{ __('receipts::messages.clients.email') }}</th>
                             <th style="text-align:right;">{{ __('receipts::messages.clients.receipts') }}</th>
                             <th style="text-align:right;">{{ __('receipts::messages.clients.allocations') }}</th>
                             <th></th>
@@ -38,7 +37,6 @@
                         @foreach ($clients as $client)
                             <tr>
                                 <td style="font-weight:600;">{{ $client->name }}</td>
-                                <td class="muted">{{ $client->email ?: '—' }}</td>
                                 <td class="num" style="text-align:right;">{{ $client->receipts_count }}</td>
                                 <td class="num" style="text-align:right;">{{ $client->allocations_count }}</td>
                                 <td style="text-align:right;white-space:nowrap;">

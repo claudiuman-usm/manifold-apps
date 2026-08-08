@@ -95,11 +95,13 @@ return [
     | Available Locales
     |--------------------------------------------------------------------------
     |
-    | Locales the hub UI can switch between. RO is the default (see 'locale').
+    | Locales the hub UI can switch between. EN only for now — RO is parked
+    | (translation files stay under each module's lang/ro to re-enable later
+    | by adding 'ro' back here).
     |
     */
 
-    'available_locales' => ['ro', 'en'],
+    'available_locales' => ['en'],
 
     /*
     |--------------------------------------------------------------------------

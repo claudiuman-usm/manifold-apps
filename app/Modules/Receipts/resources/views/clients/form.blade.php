@@ -29,11 +29,6 @@
             @error('name')<div class="field-error">{{ $message }}</div>@enderror
         </div>
         <div class="form-row">
-            <label for="email">{{ __('receipts::messages.clients.email') }}</label>
-            <input id="email" name="email" type="email" class="input" value="{{ old('email', $client->email) }}">
-            @error('email')<div class="field-error">{{ $message }}</div>@enderror
-        </div>
-        <div class="form-row">
             <label for="notes">{{ __('receipts::messages.clients.notes') }}</label>
             <textarea id="notes" name="notes" class="input" rows="2">{{ old('notes', $client->notes) }}</textarea>
         </div>

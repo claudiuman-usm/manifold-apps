@@ -4,7 +4,6 @@ namespace App\Modules\Receipts\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Receipts\Models\Category;
-use App\Modules\Receipts\Models\Client;
 use App\Modules\Receipts\Models\Receipt;
 use App\Modules\Receipts\Support\ReceiptExtractor;
 use Illuminate\Http\RedirectResponse;
@@ -148,12 +147,11 @@ class ReceiptController extends Controller
 
     public function show(Receipt $receipt): View
     {
-        $receipt->load('category', 'client', 'allocation');
+        $receipt->load('category', 'allocation');
 
         return view('receipts::show', [
             'receipt' => $receipt,
             'categories' => Category::orderBy('name')->get(),
-            'clients' => Client::orderBy('name')->get(),
             'baseCurrency' => config('receipts.base_currency', 'RON'),
         ]);
     }
@@ -166,7 +164,6 @@ class ReceiptController extends Controller
             'currency' => ['required', 'string', 'size:3'],
             'purchased_at' => ['nullable', 'date'],
             'category_id' => ['nullable', 'integer', 'exists:receipt_categories,id'],
-            'client_id' => ['nullable', 'integer', 'exists:receipt_clients,id'],
             'notes' => ['nullable', 'string'],
         ]);
 

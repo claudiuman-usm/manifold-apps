@@ -55,10 +55,6 @@
                             <label for="nc-name">{{ __('receipts::messages.clients.name') }}</label>
                             <input id="nc-name" class="input" autocomplete="off">
                         </div>
-                        <div class="form-row">
-                            <label for="nc-email">{{ __('receipts::messages.clients.email') }}</label>
-                            <input id="nc-email" type="email" class="input" autocomplete="off">
-                        </div>
                         <div id="nc-error" class="field-error" hidden></div>
                         <div class="flex gap-sm">
                             <button type="button" id="nc-save" class="btn btn-primary btn-sm">{{ __('receipts::messages.clients.save') }}</button>
@@ -142,7 +138,6 @@
 
     const select = document.getElementById('client_id');
     const nameInput = document.getElementById('nc-name');
-    const emailInput = document.getElementById('nc-email');
     const errBox = document.getElementById('nc-error');
     const saveBtn = document.getElementById('nc-save');
     const cancelBtn = document.getElementById('nc-cancel');
@@ -151,7 +146,7 @@
     const errFallback = @js(__('receipts::messages.allocations.client_error'));
 
     function open() { panel.hidden = false; errBox.hidden = true; nameInput.focus(); }
-    function close() { panel.hidden = true; errBox.hidden = true; nameInput.value = ''; emailInput.value = ''; }
+    function close() { panel.hidden = true; errBox.hidden = true; nameInput.value = ''; }
 
     toggle.addEventListener('click', () => panel.hidden ? open() : close());
     cancelBtn.addEventListener('click', close);
@@ -167,10 +162,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': token,
                 },
-                body: JSON.stringify({
-                    name: nameInput.value.trim(),
-                    email: emailInput.value.trim() || null,
-                }),
+                body: JSON.stringify({ name: nameInput.value.trim() }),
             });
             if (res.status === 422) {
                 const data = await res.json();

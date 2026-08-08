@@ -3,6 +3,17 @@
 <head>
     <meta charset="utf-8">
     @php($fmt = fn ($n) => number_format((float) $n, 2))
+    @php($catRo = [
+        'Groceries' => 'Alimente',
+        'Meals' => 'Mese',
+        'Transport' => 'Transport',
+        'Office' => 'Birou',
+        'Software' => 'Software',
+        'Travel' => 'Deplasări',
+        'Utilities' => 'Utilități',
+        'Other' => 'Altele',
+    ])
+    @php($catName = fn ($c) => $c ? ($catRo[$c->name] ?? $c->name) : '—')
     <style>
         * { font-family: "DejaVu Sans", sans-serif; }
         body { color: #1a1a1a; font-size: 12px; margin: 0; }
@@ -60,7 +71,7 @@
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $r->merchant ?: '—' }}</td>
                     <td>{{ optional($r->purchased_at)->format('d.m.y') ?: '—' }}</td>
-                    <td>{{ $r->category?->name ?: '—' }}</td>
+                    <td>{{ $catName($r->category) }}</td>
                     <td class="r">{{ $fmt($r->amount) }}</td>
                     <td>{{ $r->currency }}</td>
                 </tr>
