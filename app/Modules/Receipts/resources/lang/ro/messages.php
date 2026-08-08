@@ -94,6 +94,8 @@ return [
         'add' => 'Alocare nouă',
         'empty' => 'Nicio alocare încă.',
         'client' => 'Client',
+        'new_client' => 'Client nou',
+        'client_error' => 'Nu am putut adăuga clientul. Încearcă din nou.',
         'invoice_number' => 'Număr factură',
         'invoice_placeholder' => 'ex: USM 1680',
         'title' => 'Titlu',

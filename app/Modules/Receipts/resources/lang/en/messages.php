@@ -94,6 +94,8 @@ return [
         'add' => 'New allocation',
         'empty' => 'No allocations yet.',
         'client' => 'Client',
+        'new_client' => 'New client',
+        'client_error' => 'Could not add the client. Please try again.',
         'invoice_number' => 'Invoice number',
         'invoice_placeholder' => 'e.g. USM 1680',
         'title' => 'Title',

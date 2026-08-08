@@ -7,6 +7,16 @@
     <meta name="color-scheme" content="light dark">
     <title>@yield('title', __('hub.app_name')) · {{ __('hub.app_name') }}</title>
     @include('partials.favicon', ['ctx' => trim($__env->yieldContent('bodyClass', 'ctx-hub'))])
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ route('assets.icon', 180) }}">
+    <link rel="apple-touch-icon" sizes="167x167" href="{{ route('assets.icon', 167) }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ route('assets.icon', 152) }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ route('assets.icon', 120) }}">
+    <link rel="manifest" href="{{ route('assets.manifest') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ __('hub.app_name') }}">
+    <meta name="theme-color" content="#f59e0b">
     <link rel="stylesheet" href="{{ route('assets.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
     @stack('head')
 </head>

@@ -42,9 +42,29 @@
                                 <option value="{{ $c->id }}" @selected((int) old('client_id') === $c->id)>{{ $c->name }}</option>
                             @endforeach
                         </select>
-                        <a href="{{ route('receipts.clients.create') }}" target="_blank" class="btn btn-ghost" title="{{ __('receipts::messages.clients.add') }}">+</a>
+                        <button type="button" id="nc-toggle" class="btn btn-ghost"
+                                data-store-url="{{ route('receipts.clients.store') }}"
+                                title="{{ __('receipts::messages.allocations.new_client') }}">+</button>
                     </div>
                     @error('client_id')<div class="field-error">{{ $message }}</div>@enderror
+
+                    {{-- Inline "add client" panel — fields carry no name= so they never submit with the allocation. --}}
+                    <div id="nc-panel" hidden style="margin-top:12px;padding:14px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);">
+                        <div style="font-weight:600;margin-bottom:10px;">{{ __('receipts::messages.allocations.new_client') }}</div>
+                        <div class="form-row">
+                            <label for="nc-name">{{ __('receipts::messages.clients.name') }}</label>
+                            <input id="nc-name" class="input" autocomplete="off">
+                        </div>
+                        <div class="form-row">
+                            <label for="nc-email">{{ __('receipts::messages.clients.email') }}</label>
+                            <input id="nc-email" type="email" class="input" autocomplete="off">
+                        </div>
+                        <div id="nc-error" class="field-error" hidden></div>
+                        <div class="flex gap-sm">
+                            <button type="button" id="nc-save" class="btn btn-primary btn-sm">{{ __('receipts::messages.clients.save') }}</button>
+                            <button type="button" id="nc-cancel" class="btn btn-ghost btn-sm">{{ __('receipts::messages.create.cancel') }}</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -112,6 +132,66 @@
     }
     select.addEventListener('change', apply);
     apply();
+})();
+
+// Inline "add client" — create via fetch, then select the new option in place.
+(function () {
+    const toggle = document.getElementById('nc-toggle');
+    const panel = document.getElementById('nc-panel');
+    if (!toggle || !panel) return;
+
+    const select = document.getElementById('client_id');
+    const nameInput = document.getElementById('nc-name');
+    const emailInput = document.getElementById('nc-email');
+    const errBox = document.getElementById('nc-error');
+    const saveBtn = document.getElementById('nc-save');
+    const cancelBtn = document.getElementById('nc-cancel');
+    const storeUrl = toggle.dataset.storeUrl;
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+    const errFallback = @js(__('receipts::messages.allocations.client_error'));
+
+    function open() { panel.hidden = false; errBox.hidden = true; nameInput.focus(); }
+    function close() { panel.hidden = true; errBox.hidden = true; nameInput.value = ''; emailInput.value = ''; }
+
+    toggle.addEventListener('click', () => panel.hidden ? open() : close());
+    cancelBtn.addEventListener('click', close);
+
+    async function save() {
+        errBox.hidden = true;
+        saveBtn.disabled = true;
+        try {
+            const res = await fetch(storeUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                body: JSON.stringify({
+                    name: nameInput.value.trim(),
+                    email: emailInput.value.trim() || null,
+                }),
+            });
+            if (res.status === 422) {
+                const data = await res.json();
+                errBox.textContent = Object.values(data.errors)[0][0];
+                errBox.hidden = false;
+                return;
+            }
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const client = await res.json();
+            select.add(new Option(client.name, client.id, true, true));
+            close();
+        } catch (e) {
+            errBox.textContent = errFallback;
+            errBox.hidden = false;
+        } finally {
+            saveBtn.disabled = false;
+        }
+    }
+
+    saveBtn.addEventListener('click', save);
+    nameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); save(); } });
 })();
 </script>
 @endpush

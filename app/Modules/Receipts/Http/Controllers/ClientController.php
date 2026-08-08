@@ -4,6 +4,7 @@ namespace App\Modules\Receipts\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Receipts\Models\Client;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -25,9 +26,14 @@ class ClientController extends Controller
         return view('receipts::clients.form', ['client' => new Client()]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
-        Client::create($this->validated($request));
+        $client = Client::create($this->validated($request));
+
+        // Inline add from the allocation builder posts via fetch and expects JSON.
+        if ($request->wantsJson()) {
+            return response()->json(['id' => $client->id, 'name' => $client->name]);
+        }
 
         return redirect()->route('receipts.clients.index')
             ->with('status', __('receipts::messages.clients.flash.created'));
