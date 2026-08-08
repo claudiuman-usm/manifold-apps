@@ -21,8 +21,7 @@
 
         <div id="dropzone" class="receipt-dropzone">
             <div id="dz-empty">
-                <div style="font-size:2rem;">🧾</div>
-                <div style="font-weight:600;margin-top:8px;">{{ __('receipts::messages.create.pick') }}</div>
+                <div style="font-weight:600;">{{ __('receipts::messages.create.pick') }}</div>
                 <div class="muted" style="font-size:.85rem;margin-top:6px;">{{ __('receipts::messages.create.hint') }}</div>
             </div>
             <img id="preview" alt="" hidden>

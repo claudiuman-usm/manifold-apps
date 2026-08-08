@@ -69,7 +69,7 @@ return [
     ],
 
     'nudge' => [
-        'title' => 'Keep it flowing 🌊',
+        'title' => 'Keep it flowing',
         'body' => "You're over your usual pace for this step.",
     ],
 

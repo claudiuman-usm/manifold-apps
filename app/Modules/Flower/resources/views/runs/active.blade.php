@@ -52,8 +52,8 @@
             <form method="POST" action="{{ route('flower.runs.advance', $run) }}" class="mt">
                 @csrf
                 <button type="submit" class="btn btn-primary btn-lg">
-                    @if ($isLastStep) ✓ {{ __('flower::messages.run.check_last') }}
-                    @else ✓ {{ __('flower::messages.run.check') }} @endif
+                    @if ($isLastStep) {{ __('flower::messages.run.check_last') }}
+                    @else {{ __('flower::messages.run.check') }} @endif
                 </button>
             </form>
         </div>
@@ -63,9 +63,7 @@
     <ul class="run-steps">
         @foreach ($rows as $i => $row)
             <li class="run-step {{ $row['is_done'] ? 'done' : '' }} {{ $row['is_current'] ? 'current' : '' }}">
-                <span class="marker">
-                    @if ($row['is_done']) ✓ @else {{ $i + 1 }} @endif
-                </span>
+                <span class="marker">{{ $i + 1 }}</span>
                 <span class="name">{{ $row['step']->name }}</span>
                 <span class="meta">
                     @if ($row['is_done'])

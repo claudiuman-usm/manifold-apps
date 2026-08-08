@@ -69,7 +69,7 @@ return [
     ],
 
     'nudge' => [
-        'title' => 'Menține ritmul 🌊',
+        'title' => 'Menține ritmul',
         'body' => 'Ai depășit ritmul obișnuit pentru acest pas.',
     ],
 

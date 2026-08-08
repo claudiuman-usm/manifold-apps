@@ -27,7 +27,7 @@ class Module
 
     public function icon(): string
     {
-        return $this->manifest['icon'] ?? '📦';
+        return $this->manifest['icon'] ?? '';
     }
 
     /** Color key for the dashboard card: teal|violet|amber|sky|pink. */

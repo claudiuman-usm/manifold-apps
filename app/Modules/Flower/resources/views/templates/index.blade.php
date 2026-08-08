@@ -52,7 +52,7 @@
                                                         <form method="POST" action="{{ route('flower.runs.start', $template) }}">
                                                             @csrf
                                                             <button type="submit" class="btn btn-primary btn-sm">
-                                                                ▶ {{ __('flower::messages.index.start_run') }}
+                                                                {{ __('flower::messages.index.start_run') }}
                                                             </button>
                                                         </form>
                                                     @endif

@@ -82,7 +82,7 @@ class ReceiptController extends Controller
         $squarePath = "receipts/{$uuid}_sq.jpg";
         Storage::disk('local')->put($squarePath, $squareBinary);
 
-        // Try AI extraction on the square image (fails soft → manual review).
+        // Try AI extraction on the square image (fails soft -> manual review).
         $categoryNames = Category::orderBy('name')->pluck('name')->all();
         $fields = $extractor->extract(base64_encode($squareBinary), 'image/jpeg', $categoryNames);
 

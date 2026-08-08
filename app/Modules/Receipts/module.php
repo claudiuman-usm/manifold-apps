@@ -6,7 +6,7 @@
 return [
     'key' => 'receipts',
     'order' => 20,
-    'icon' => '🧾',
+    'icon' => '',
     'color' => 'amber',
     'route' => 'receipts.index',
     'name' => [

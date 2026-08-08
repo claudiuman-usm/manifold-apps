@@ -21,7 +21,7 @@
         @if ($template->steps->isNotEmpty())
             <form method="POST" action="{{ route('flower.runs.start', $template) }}">
                 @csrf
-                <button type="submit" class="btn btn-primary">▶ {{ __('flower::messages.history.start_run') }}</button>
+                <button type="submit" class="btn btn-primary">{{ __('flower::messages.history.start_run') }}</button>
             </form>
         @endif
     </div>

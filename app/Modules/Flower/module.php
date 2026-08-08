@@ -7,7 +7,7 @@
 return [
     'key' => 'flower',
     'order' => 10,
-    'icon' => '🌊',
+    'icon' => '',
     'color' => 'teal',
     'route' => 'flower.index',
     'name' => [

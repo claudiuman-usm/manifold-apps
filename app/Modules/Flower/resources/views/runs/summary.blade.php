@@ -14,7 +14,7 @@
     </div>
 
     <div class="page-head">
-        <h1>🌊 {{ __('flower::messages.summary.heading') }}</h1>
+        <h1>{{ __('flower::messages.summary.heading') }}</h1>
         <p>{{ __('flower::messages.summary.subheading') }}</p>
     </div>
 
@@ -29,7 +29,7 @@
             <div class="flex gap-sm">
                 <form method="POST" action="{{ route('flower.runs.start', $template) }}">
                     @csrf
-                    <button type="submit" class="btn btn-primary">↻ {{ __('flower::messages.summary.start_over') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('flower::messages.summary.start_over') }}</button>
                 </form>
                 <a href="{{ route('flower.templates.history', $template) }}" class="btn">
                     {{ __('flower::messages.summary.view_history') }}
