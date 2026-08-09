@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.4.2] - 2026-08-09
+
+### Fixed
+- Flow-er run mode: the current (active) step's label was low-contrast in dark mode — the step button now uses the theme text colour.
+- Flow-er run mode: switching theme (light/dark) or locale from the topbar no longer triggers the "leave a running flow" warning — those toggles just reload the same page.
+
 ## [1.4.1] - 2026-08-09
 
 ### Changed

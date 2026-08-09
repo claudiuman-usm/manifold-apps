@@ -1,6 +1,7 @@
 @php($current = session('theme', 'light'))
 <a href="{{ route('theme.switch', $current === 'dark' ? 'light' : 'dark') }}"
    class="icon-btn"
+   data-keep-flow
    title="{{ $current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode' }}"
    aria-label="{{ $current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode' }}">
     @if ($current === 'dark')

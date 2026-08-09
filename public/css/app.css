@@ -550,7 +550,7 @@ table.data tfoot td { border-top: 1px solid var(--panel-border); border-bottom: 
 
 /* Active step is a checkbox you click to advance. */
 .run-step-form { margin: 0; }
-.run-step-click { width: 100%; font: inherit; text-align: left; cursor: pointer; appearance: none; -webkit-appearance: none; transition: border-color .14s, background .14s, transform .12s, box-shadow .14s; }
+.run-step-click { width: 100%; color: var(--text); font: inherit; text-align: left; cursor: pointer; appearance: none; -webkit-appearance: none; transition: border-color .14s, background .14s, transform .12s, box-shadow .14s; }
 .run-step-click .marker.check { position: relative; }
 .run-step-click .marker.check::after { content: "✓"; font-size: .8rem; font-weight: 800; opacity: 0; transition: opacity .12s; }
 .run-step-click:hover { transform: scale(1.01); box-shadow: 0 0 0 1px var(--accent) inset, var(--shadow); }

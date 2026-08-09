@@ -3,6 +3,7 @@
     <span class="locale-switch">
         @foreach ($locales as $loc)
             <a href="{{ route('locale.switch', $loc) }}"
+               data-keep-flow
                class="{{ app()->getLocale() === $loc ? 'active' : '' }}">{{ $loc }}</a>
         @endforeach
     </span>

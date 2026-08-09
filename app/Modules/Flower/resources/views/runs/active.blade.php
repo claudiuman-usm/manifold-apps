@@ -175,6 +175,10 @@
 (function () {
     let leaving = false;
     document.addEventListener('submit', function () { leaving = true; }, true);
+    // Topbar toggles (theme / locale) just reload the same page — not leaving the flow.
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-keep-flow]')) leaving = true;
+    }, true);
 
     window.addEventListener('beforeunload', function (e) {
         if (leaving) return;
