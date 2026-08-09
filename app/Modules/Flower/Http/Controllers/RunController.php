@@ -9,6 +9,7 @@ use App\Modules\Flower\Models\StepLog;
 use App\Modules\Flower\Models\Template;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -55,7 +56,8 @@ class RunController extends Controller
             : $this->active($run);
     }
 
-    /** Check off the current step: close its timer, open the next (or finish). */
+    /** Check off the current step: bank its time, then open the next step, or —
+     *  if you'd stepped back to edit an earlier step — jump forward to where you were. */
     public function advance(Run $run): RedirectResponse
     {
         if ($run->isCompleted()) {
@@ -70,14 +72,26 @@ class RunController extends Controller
             }
 
             $now = Carbon::now();
-            $openLog->update([
-                'completed_at' => $now,
-                'duration_seconds' => max(0, (int) round($openLog->started_at->diffInSeconds($now, true))),
-            ]);
+            $this->closeLog($openLog, $now);
 
             $steps = $run->template->steps()->orderBy('position')->get();
             $currentIndex = $steps->search(fn (Step $s) => $s->id === $openLog->step_id);
-            $nextStep = $currentIndex !== false ? $steps->get($currentIndex + 1) : null;
+
+            if ($currentIndex === false) {
+                return;
+            }
+
+            $frontierIndex = $this->frontierIndex($run, $steps);
+
+            // Editing an earlier step: return to the furthest step reached and resume it.
+            if ($currentIndex < $frontierIndex) {
+                $this->resumeStep($run, $steps->get($frontierIndex)->id, $now);
+
+                return;
+            }
+
+            // At the frontier: normal forward progress (open next step, or finish the run).
+            $nextStep = $steps->get($currentIndex + 1);
 
             if ($nextStep) {
                 StepLog::create([
@@ -94,6 +108,78 @@ class RunController extends Controller
         });
 
         return redirect()->route('flower.runs.show', $run);
+    }
+
+    /** Step back one: bank the current step's time, then reopen the previous step so its
+     *  timer resumes and any new time adds onto what it had already recorded. */
+    public function back(Run $run): RedirectResponse
+    {
+        if ($run->isCompleted()) {
+            return redirect()->route('flower.runs.show', $run);
+        }
+
+        DB::transaction(function () use ($run) {
+            $openLog = $run->stepLogs()->whereNull('completed_at')->latest('started_at')->first();
+
+            if (! $openLog) {
+                return;
+            }
+
+            $steps = $run->template->steps()->orderBy('position')->get();
+            $currentIndex = $steps->search(fn (Step $s) => $s->id === $openLog->step_id);
+
+            // Nothing before the first step.
+            if ($currentIndex === false || $currentIndex === 0) {
+                return;
+            }
+
+            $now = Carbon::now();
+            $this->closeLog($openLog, $now);
+            $this->resumeStep($run, $steps->get($currentIndex - 1)->id, $now);
+        });
+
+        return redirect()->route('flower.runs.show', $run);
+    }
+
+    /** Close an open step log, adding the just-elapsed segment onto any time it already banked. */
+    protected function closeLog(StepLog $log, Carbon $now): void
+    {
+        $segment = max(0, (int) round($log->started_at->diffInSeconds($now, true)));
+
+        $log->update([
+            'completed_at' => $now,
+            'duration_seconds' => (int) ($log->duration_seconds ?? 0) + $segment,
+        ]);
+    }
+
+    /** Reopen a step's existing log so its timer runs again, keeping its banked duration. */
+    protected function resumeStep(Run $run, int $stepId, Carbon $now): void
+    {
+        $log = $run->stepLogs()->where('step_id', $stepId)->first();
+
+        if (! $log) {
+            return;
+        }
+
+        $log->update([
+            'completed_at' => null,
+            'started_at' => $now,
+        ]);
+    }
+
+    /** Index (in the ordered step list) of the furthest step reached — i.e. the one that has a log. */
+    protected function frontierIndex(Run $run, Collection $steps): int
+    {
+        $loggedStepIds = $run->stepLogs()->pluck('step_id')->all();
+        $frontier = -1;
+
+        foreach ($steps as $i => $step) {
+            if (in_array($step->id, $loggedStepIds, true)) {
+                $frontier = $i;
+            }
+        }
+
+        return $frontier;
     }
 
     /** Cancel an in-progress run (not saved to history). */
@@ -158,14 +244,20 @@ class RunController extends Controller
         $total = $steps->count();
         $isLastStep = $currentStepId !== null && $steps->last()?->id === $currentStepId;
 
+        $currentIndex = $currentStepId !== null
+            ? $steps->search(fn (Step $s) => $s->id === $currentStepId)
+            : false;
+        $canGoBack = $currentIndex !== false && $currentIndex > 0;
+
         $currentRow = $rows->firstWhere('is_current', true);
         $currentAverage = $currentRow['average'] ?? null;
-        $currentStartedAt = $currentRow['started_at'] ?? null;
 
-        // Seconds already elapsed on the current step at page load (server-computed,
-        // so client clock skew never affects the nudge threshold).
-        $currentElapsedAtLoad = $currentStartedAt
-            ? max(0, (int) round($currentStartedAt->diffInSeconds(Carbon::now(), true)))
+        // Seconds already on the current step at page load: any time it banked from a
+        // previous visit plus the current open segment. Server-computed, so client clock
+        // skew never affects the nudge threshold.
+        $currentElapsedAtLoad = $openLog
+            ? (int) ($openLog->duration_seconds ?? 0)
+                + max(0, (int) round($openLog->started_at->diffInSeconds(Carbon::now(), true)))
             : 0;
 
         return view('flower::runs.active', [
@@ -175,6 +267,7 @@ class RunController extends Controller
             'doneCount' => $doneCount,
             'total' => $total,
             'isLastStep' => $isLastStep,
+            'canGoBack' => $canGoBack,
             'currentAverage' => $currentAverage,
             'currentElapsedAtLoad' => $currentElapsedAtLoad,
         ]);

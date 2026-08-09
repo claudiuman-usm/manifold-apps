@@ -59,6 +59,7 @@ return [
         'average' => 'Media',
         'check' => 'Gata — pasul următor',
         'check_last' => 'Gata — finalizează rularea',
+        'back' => 'Înapoi un pas',
         'progress' => ':done din :total pași',
         'pending' => 'În așteptare',
         'done' => 'Finalizat',

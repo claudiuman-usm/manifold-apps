@@ -49,13 +49,23 @@
                 @endif
             </div>
 
-            <form method="POST" action="{{ route('flower.runs.advance', $run) }}" class="mt">
-                @csrf
-                <button type="submit" class="btn btn-primary btn-lg">
-                    @if ($isLastStep) {{ __('flower::messages.run.check_last') }}
-                    @else {{ __('flower::messages.run.check') }} @endif
-                </button>
-            </form>
+            <div class="timer-actions mt">
+                @if ($canGoBack)
+                    <form method="POST" action="{{ route('flower.runs.back', $run) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-ghost btn-lg">
+                            ← {{ __('flower::messages.run.back') }}
+                        </button>
+                    </form>
+                @endif
+                <form method="POST" action="{{ route('flower.runs.advance', $run) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        @if ($isLastStep) {{ __('flower::messages.run.check_last') }}
+                        @else {{ __('flower::messages.run.check') }} @endif
+                    </button>
+                </form>
+            </div>
         </div>
     @endif
 

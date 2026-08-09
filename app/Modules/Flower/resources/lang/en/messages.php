@@ -59,6 +59,7 @@ return [
         'average' => 'Average',
         'check' => 'Next Step',
         'check_last' => 'Finish run',
+        'back' => 'Back a step',
         'progress' => ':done of :total steps',
         'pending' => 'Pending',
         'done' => 'Done',

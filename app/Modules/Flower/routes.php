@@ -26,4 +26,5 @@ Route::get('templates/{template}/history', [RunController::class, 'history'])->n
 Route::post('templates/{template}/runs', [RunController::class, 'start'])->name('runs.start');
 Route::get('runs/{run}', [RunController::class, 'show'])->name('runs.show');
 Route::post('runs/{run}/advance', [RunController::class, 'advance'])->name('runs.advance');
+Route::post('runs/{run}/back', [RunController::class, 'back'])->name('runs.back');
 Route::delete('runs/{run}', [RunController::class, 'destroy'])->name('runs.destroy');

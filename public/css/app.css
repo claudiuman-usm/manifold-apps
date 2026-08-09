@@ -481,6 +481,8 @@ table.data tfoot td { border-top: 1px solid var(--panel-border); border-bottom: 
 .timer-hero .clock.over { color: var(--warning); }
 .timer-hero .avg-note { color: var(--text-2); font-size: .9rem; margin-top: 14px; font-variant-numeric: tabular-nums; font-weight: 600; }
 .timer-hero form { margin-top: 28px; }
+.timer-actions { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.timer-hero .timer-actions form { margin-top: 0; }
 
 .run-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
 .run-step {
