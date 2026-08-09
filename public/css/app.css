@@ -517,11 +517,19 @@ table.data tfoot td { border-top: 1px solid var(--panel-border); border-bottom: 
 .run-step-click .marker.check { position: relative; }
 .run-step-click .marker.check::after { content: "✓"; font-size: .8rem; font-weight: 800; opacity: 0; transition: opacity .12s; }
 .run-step-click:hover { transform: scale(1.01); box-shadow: 0 0 0 1px var(--accent) inset, var(--shadow); }
-.run-step-click:hover .marker.check { background: var(--accent); border-color: var(--accent); }
-.run-step-click:hover .marker.check::after { opacity: 1; color: var(--accent-ink); }
+/* Hover = pale-green outline + check only (no fill), so it can't be mistaken for a completed (solid green) step. */
+.run-step-click:hover .marker.check { background: transparent; border-color: color-mix(in srgb, var(--success) 55%, transparent); }
+.run-step-click:hover .marker.check::after { opacity: 1; color: color-mix(in srgb, var(--success) 70%, transparent); }
 .run-step-click:active { transform: scale(.995); }
 
 /* ---- Nudge — phone-style glass toast, slides in from the top ---- */
+.nudge-scrim {
+    position: fixed; inset: 0; z-index: 190; /* just under the toast (200) */
+    background: radial-gradient(120% 80% at 50% 0%, rgba(0, 0, 0, .22), rgba(0, 0, 0, .06) 60%, transparent);
+    opacity: 0; pointer-events: none;
+    transition: opacity .28s ease;
+}
+.nudge-scrim.show { opacity: 1; }
 .nudge-toast {
     position: fixed; top: 78px; left: 50%; /* clears the 64px sticky header */
     transform: translate(-50%, -220%);
@@ -544,6 +552,7 @@ table.data tfoot td { border-top: 1px solid var(--panel-border); border-bottom: 
 .nudge-toast form { flex: none; margin: 0; }
 @media (prefers-reduced-motion: reduce) {
     .nudge-toast { transition: opacity .2s ease; transform: translate(-50%, 0); }
+    .nudge-scrim { transition: opacity .2s ease; }
 }
 @keyframes nudge-in { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 

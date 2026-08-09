@@ -93,6 +93,7 @@
     </ul>
 
     {{-- Nudge — phone-style glass toast that slides in from the top --}}
+    <div class="nudge-scrim" id="nudge-scrim" aria-hidden="true"></div>
     <div class="nudge-toast" id="nudge">
         <div class="nudge-toast-text">
             <strong>{{ __('flower::messages.nudge.title') }}</strong>
@@ -116,6 +117,7 @@
 
     const clock = document.getElementById('clock');
     const nudge = document.getElementById('nudge');
+    const nudgeScrim = document.getElementById('nudge-scrim');
     const base = parseInt(hero.dataset.elapsed || '0', 10);
     const threshold = hero.dataset.threshold === '' ? null : parseInt(hero.dataset.threshold, 10);
     const loadedAt = Date.now();
@@ -133,6 +135,7 @@
         const over = threshold !== null && elapsed > threshold;
         clock.classList.toggle('over', over);
         if (nudge) nudge.classList.toggle('show', over);
+        if (nudgeScrim) nudgeScrim.classList.toggle('show', over);
     }
 
     tick();
