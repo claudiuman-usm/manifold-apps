@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.3.1] - 2026-08-09
+
+### Fixed
+- Flow-er: the run-complete (summary) screen no longer shows the Resume / "In progress" option — it's a finished run. Resume stays only on the revisit surfaces (template list and run history).
+
 ## [1.3.0] - 2026-08-09
 
 ### Added
