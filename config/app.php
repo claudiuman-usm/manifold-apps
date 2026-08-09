@@ -16,7 +16,7 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
 
     // Bumped on each release; shown in the footer as a deploy marker.
-    'version' => '1.3.1',
+    'version' => '1.3.2',
 
     // Secret for the token-guarded /_deploy/migrate endpoint (no-SSH migrations).
     'deploy_token' => env('DEPLOY_TOKEN'),

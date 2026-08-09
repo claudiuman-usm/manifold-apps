@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.3.2] - 2026-08-09
+
+### Changed
+- Flow-er: run history is now responsive. On phones the wide runs × steps matrix becomes one card per run (step name → time rows) plus an averages card; the full table stays on wider screens.
+
 ## [1.3.1] - 2026-08-09
 
 ### Fixed

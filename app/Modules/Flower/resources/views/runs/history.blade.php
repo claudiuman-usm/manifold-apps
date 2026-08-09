@@ -28,7 +28,10 @@
     @if ($runs->isEmpty())
         <div class="empty-state card card-pad">{{ __('flower::messages.history.empty') }}</div>
     @else
-        <div class="card">
+        @php($avgTotal = collect($template->steps)->sum(fn ($s) => $averages[$s->id] ?? 0))
+
+        {{-- Desktop: full matrix table (scrolls horizontally if very wide). --}}
+        <div class="card history-table">
             <div class="table-wrap">
                 <table class="data">
                     <thead>
@@ -61,9 +64,7 @@
                     <tfoot>
                         <tr>
                             <td colspan="2" style="font-weight:600;">{{ __('flower::messages.history.average_row') }}</td>
-                            @php($avgTotal = 0)
                             @foreach ($template->steps as $step)
-                                @php($avgTotal += $averages[$step->id] ?? 0)
                                 <td class="num" style="text-align:right;">
                                     {{ $averages[$step->id] !== null ? Duration::format($averages[$step->id]) : '—' }}
                                 </td>
@@ -72,6 +73,43 @@
                         </tr>
                     </tfoot>
                 </table>
+            </div>
+        </div>
+
+        {{-- Mobile: one card per run, plus an averages card. --}}
+        <div class="history-cards">
+            @foreach ($runs as $i => $run)
+                @php($byStep = $run->stepLogs->keyBy('step_id'))
+                <div class="card card-pad history-card">
+                    <div class="history-card-head">
+                        <span class="history-card-title">#{{ $runs->count() - $i }}</span>
+                        <span class="muted">{{ optional($run->completed_at)->format('Y-m-d H:i') }}</span>
+                        <span class="history-card-total num">{{ Duration::format($run->stepLogs->sum('duration_seconds')) }}</span>
+                    </div>
+                    <dl class="history-card-steps">
+                        @foreach ($template->steps as $step)
+                            <div class="history-card-row">
+                                <dt>{{ $step->name }}</dt>
+                                <dd class="num">{{ Duration::format(optional($byStep->get($step->id))->duration_seconds) }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+                </div>
+            @endforeach
+
+            <div class="card card-pad history-card history-card-avg">
+                <div class="history-card-head">
+                    <span class="history-card-title">{{ __('flower::messages.history.average_row') }}</span>
+                    <span class="history-card-total num">{{ Duration::format($avgTotal) }}</span>
+                </div>
+                <dl class="history-card-steps">
+                    @foreach ($template->steps as $step)
+                        <div class="history-card-row">
+                            <dt>{{ $step->name }}</dt>
+                            <dd class="num">{{ $averages[$step->id] !== null ? Duration::format($averages[$step->id]) : '—' }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
             </div>
         </div>
     @endif

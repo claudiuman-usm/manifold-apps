@@ -412,6 +412,20 @@ h3 { font-weight: 500; letter-spacing: -.01em; }
 
 /* ---- Tables ---- */
 .table-wrap { overflow-x: auto; border-radius: var(--r-el); }
+
+/* Run-history: matrix table on desktop, card-per-run on mobile (cards hidden until then). */
+.history-cards { display: none; }
+.history-card + .history-card { margin-top: 12px; }
+.history-card-head { display: flex; align-items: baseline; gap: 10px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--stroke); }
+.history-card-title { font-weight: 800; font-size: 1.05rem; }
+.history-card-head .muted { font-size: .85rem; }
+.history-card-total { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+.history-card-steps { margin: 0; }
+.history-card-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 7px 0; }
+.history-card-row dt { color: var(--text-2); font-weight: 600; min-width: 0; }
+.history-card-row dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.history-card-avg { background: var(--panel-2); }
+.history-card-avg .history-card-row dd { color: var(--text-2); }
 table.data { width: 100%; border-collapse: collapse; font-size: .9rem; }
 table.data th, table.data td { text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--stroke); }
 table.data th { color: var(--text-3); font-weight: 800; font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; }
@@ -653,6 +667,8 @@ body.ctx-receipts {
     .brand small { display: none; }
     .content { padding: 28px 16px 64px; }
     .page-head h1 { font-size: 2rem; }
+    .history-table { display: none; }
+    .history-cards { display: block; }
 }
 
 @media (prefers-reduced-motion: reduce) {
