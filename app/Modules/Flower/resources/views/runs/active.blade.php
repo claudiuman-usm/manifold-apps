@@ -62,6 +62,13 @@
                         </button>
                     </form>
                 @endif
+                <form method="POST" action="{{ route('flower.runs.advance', $run) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        @if ($isLastStep) {{ __('flower::messages.run.check_last') }}
+                        @else {{ __('flower::messages.run.check') }} @endif
+                    </button>
+                </form>
                 <form method="POST" action="{{ route('flower.runs.pause', $run) }}">
                     @csrf
                     <button type="submit" class="btn-round-green"
@@ -72,13 +79,6 @@
                         @else
                             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
                         @endif
-                    </button>
-                </form>
-                <form method="POST" action="{{ route('flower.runs.advance', $run) }}">
-                    @csrf
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        @if ($isLastStep) {{ __('flower::messages.run.check_last') }}
-                        @else {{ __('flower::messages.run.check') }} @endif
                     </button>
                 </form>
             </div>

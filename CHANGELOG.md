@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.4.1] - 2026-08-09
+
+### Changed
+- Flow-er run mode: the pause/play button now sits after the Next button and is smaller, reading as a secondary action.
+
 ## [1.4.0] - 2026-08-09
 
 ### Added
