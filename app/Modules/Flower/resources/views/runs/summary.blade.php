@@ -26,11 +26,8 @@
                     {{ __('flower::messages.summary.total') }}: {{ Duration::format($totalDuration) }}
                 </div>
             </div>
-            <div class="flex gap-sm">
-                <form method="POST" action="{{ route('flower.runs.start', $template) }}">
-                    @csrf
-                    <button type="submit" class="btn btn-primary">{{ __('flower::messages.summary.start_over') }}</button>
-                </form>
+            <div class="flex gap-sm" style="align-items:center;">
+                @include('flower::runs._launch', ['template' => $template, 'label' => __('flower::messages.summary.start_over')])
                 <a href="{{ route('flower.templates.history', $template) }}" class="btn">
                     {{ __('flower::messages.summary.view_history') }}
                 </a>

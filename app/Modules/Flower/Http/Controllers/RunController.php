@@ -29,6 +29,14 @@ class RunController extends Controller
         $run = DB::transaction(function () use ($template) {
             $now = Carbon::now();
 
+            // Starting a new run discards any flow left in progress for this template
+            // (the user chose "start new" over "resume").
+            $template->runs()
+                ->where('status', Run::STATUS_IN_PROGRESS)
+                ->get()
+                ->each
+                ->delete();
+
             $run = Run::create([
                 'template_id' => $template->id,
                 'status' => Run::STATUS_IN_PROGRESS,

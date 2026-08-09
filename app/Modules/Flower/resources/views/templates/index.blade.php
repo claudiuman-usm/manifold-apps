@@ -47,14 +47,9 @@
                                                 {{ trans_choice('flower::messages.index.runs_count', $template->completed_runs_count, ['count' => $template->completed_runs_count]) }}
                                             </td>
                                             <td style="text-align:right;white-space:nowrap;">
-                                                <div class="flex gap-sm" style="justify-content:flex-end;">
+                                                <div class="flex gap-sm" style="justify-content:flex-end;align-items:center;">
                                                     @if ($template->steps_count > 0)
-                                                        <form method="POST" action="{{ route('flower.runs.start', $template) }}">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-primary btn-sm">
-                                                                {{ __('flower::messages.index.start_run') }}
-                                                            </button>
-                                                        </form>
+                                                        @include('flower::runs._launch', ['template' => $template, 'size' => 'btn-sm'])
                                                     @endif
                                                     <a href="{{ route('flower.templates.history', $template) }}" class="btn btn-sm">
                                                         {{ __('flower::messages.index.history') }}

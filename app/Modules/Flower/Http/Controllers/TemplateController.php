@@ -20,7 +20,7 @@ class TemplateController extends Controller
         $clients = Client::query()
             ->with(['types' => function ($q) {
                 $q->orderBy('name')->with(['templates' => function ($q) {
-                    $q->orderBy('name')->withCount(['steps', 'completedRuns']);
+                    $q->orderBy('name')->with('activeRun')->withCount(['steps', 'completedRuns']);
                 }]);
             }])
             ->orderBy('name')

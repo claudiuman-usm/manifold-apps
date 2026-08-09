@@ -19,10 +19,9 @@
             <p>{{ __('flower::messages.history.subheading', ['template' => $template->name]) }}</p>
         </div>
         @if ($template->steps->isNotEmpty())
-            <form method="POST" action="{{ route('flower.runs.start', $template) }}">
-                @csrf
-                <button type="submit" class="btn btn-primary">{{ __('flower::messages.history.start_run') }}</button>
-            </form>
+            <div class="flex gap-sm" style="align-items:center;">
+                @include('flower::runs._launch', ['template' => $template, 'label' => __('flower::messages.history.start_run')])
+            </div>
         @endif
     </div>
 

@@ -151,5 +151,20 @@
     tick();
     setInterval(tick, 1000);
 })();
+
+// Warn before leaving a running flow (tab close, refresh, breadcrumb/nav links, browser back).
+// The run's own actions (advance / back / check / cancel) submit forms, so we drop the guard
+// on any in-page form submit — those are intentional and the run state is saved server-side.
+(function () {
+    let leaving = false;
+    document.addEventListener('submit', function () { leaving = true; }, true);
+
+    window.addEventListener('beforeunload', function (e) {
+        if (leaving) return;
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    });
+})();
 </script>
 @endpush

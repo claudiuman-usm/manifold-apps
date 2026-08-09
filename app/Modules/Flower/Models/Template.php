@@ -5,6 +5,7 @@ namespace App\Modules\Flower\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Template extends Model
@@ -39,5 +40,14 @@ class Template extends Model
     public function completedRuns(): HasMany
     {
         return $this->runs()->where('status', 'completed');
+    }
+
+    /** The latest still-in-progress run, if any — the one a user would resume. */
+    public function activeRun(): HasOne
+    {
+        return $this->hasOne(Run::class, 'template_id')->ofMany(
+            ['id' => 'max'],
+            fn ($query) => $query->where('status', Run::STATUS_IN_PROGRESS)
+        );
     }
 }
