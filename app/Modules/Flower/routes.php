@@ -27,4 +27,5 @@ Route::post('templates/{template}/runs', [RunController::class, 'start'])->name(
 Route::get('runs/{run}', [RunController::class, 'show'])->name('runs.show');
 Route::post('runs/{run}/advance', [RunController::class, 'advance'])->name('runs.advance');
 Route::post('runs/{run}/back', [RunController::class, 'back'])->name('runs.back');
+Route::post('runs/{run}/pause', [RunController::class, 'pause'])->name('runs.pause');
 Route::delete('runs/{run}', [RunController::class, 'destroy'])->name('runs.destroy');

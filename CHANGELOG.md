@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.4.0] - 2026-08-09
+
+### Added
+- Flow-er run mode: **Pause / Play** the step timer. A round pale-green icon button pauses the clock (banking the time so far) and toggles to a play icon to resume. Paused time is never counted. Hitting Next while paused advances normally and the next step resumes running.
+
 ## [1.3.2] - 2026-08-09
 
 ### Changed

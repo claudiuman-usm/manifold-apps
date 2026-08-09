@@ -33,14 +33,18 @@
     {{-- Current-step timer hero --}}
     @php($currentRow = $rows->firstWhere('is_current', true))
     @if ($currentRow)
-        <div class="card timer-hero"
+        <div class="card timer-hero{{ $isPaused ? ' is-paused' : '' }}"
              id="timer-hero"
              data-elapsed="{{ $currentElapsedAtLoad }}"
+             data-paused="{{ $isPaused ? '1' : '0' }}"
              data-average="{{ $currentAverage !== null ? round($currentAverage) : '' }}"
              data-threshold="{{ $currentAverage !== null ? round($currentAverage) + 3 : '' }}">
             <div class="eyebrow">{{ __('flower::messages.run.current_step') }}</div>
             <div class="step-name">{{ $currentRow['step']->name }}</div>
             <div class="clock" id="clock">0:00</div>
+            @if ($isPaused)
+                <div class="paused-note">{{ __('flower::messages.run.paused') }}</div>
+            @endif
             <div class="avg-note">
                 @if ($currentAverage !== null)
                     {{ __('flower::messages.run.average') }}: {{ Duration::format($currentAverage) }}
@@ -58,6 +62,18 @@
                         </button>
                     </form>
                 @endif
+                <form method="POST" action="{{ route('flower.runs.pause', $run) }}">
+                    @csrf
+                    <button type="submit" class="btn-round-green"
+                            title="{{ $isPaused ? __('flower::messages.run.resume_timer') : __('flower::messages.run.pause') }}"
+                            aria-label="{{ $isPaused ? __('flower::messages.run.resume_timer') : __('flower::messages.run.pause') }}">
+                        @if ($isPaused)
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                        @else
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+                        @endif
+                    </button>
+                </form>
                 <form method="POST" action="{{ route('flower.runs.advance', $run) }}">
                     @csrf
                     <button type="submit" class="btn btn-primary btn-lg">
@@ -129,6 +145,7 @@
     const nudge = document.getElementById('nudge');
     const nudgeScrim = document.getElementById('nudge-scrim');
     const base = parseInt(hero.dataset.elapsed || '0', 10);
+    const paused = hero.dataset.paused === '1';
     const threshold = hero.dataset.threshold === '' ? null : parseInt(hero.dataset.threshold, 10);
     const loadedAt = Date.now();
 
@@ -139,17 +156,17 @@
     }
 
     function tick() {
-        const elapsed = base + Math.floor((Date.now() - loadedAt) / 1000);
+        const elapsed = paused ? base : base + Math.floor((Date.now() - loadedAt) / 1000);
         clock.textContent = fmt(elapsed);
 
-        const over = threshold !== null && elapsed > threshold;
+        const over = !paused && threshold !== null && elapsed > threshold;
         clock.classList.toggle('over', over);
         if (nudge) nudge.classList.toggle('show', over);
         if (nudgeScrim) nudgeScrim.classList.toggle('show', over);
     }
 
     tick();
-    setInterval(tick, 1000);
+    if (!paused) setInterval(tick, 1000);
 })();
 
 // Warn before leaving a running flow (tab close, refresh, breadcrumb/nav links, browser back).

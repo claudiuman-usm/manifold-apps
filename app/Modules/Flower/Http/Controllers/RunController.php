@@ -149,10 +149,46 @@ class RunController extends Controller
         return redirect()->route('flower.runs.show', $run);
     }
 
-    /** Close an open step log, adding the just-elapsed segment onto any time it already banked. */
+    /** Toggle the current step's timer: pause banks the running segment and stops the
+     *  clock (started_at → null); play starts a fresh segment from now. */
+    public function pause(Run $run): RedirectResponse
+    {
+        if ($run->isCompleted()) {
+            return redirect()->route('flower.runs.show', $run);
+        }
+
+        DB::transaction(function () use ($run) {
+            $openLog = $run->stepLogs()->whereNull('completed_at')->latest('started_at')->first();
+
+            if (! $openLog) {
+                return;
+            }
+
+            $now = Carbon::now();
+
+            if ($openLog->started_at === null) {
+                // Paused → play: resume the clock.
+                $openLog->update(['started_at' => $now]);
+            } else {
+                // Running → pause: bank the segment, freeze the clock.
+                $segment = max(0, (int) round($openLog->started_at->diffInSeconds($now, true)));
+                $openLog->update([
+                    'started_at' => null,
+                    'duration_seconds' => (int) ($openLog->duration_seconds ?? 0) + $segment,
+                ]);
+            }
+        });
+
+        return redirect()->route('flower.runs.show', $run);
+    }
+
+    /** Close an open step log, adding the just-elapsed segment onto any time it already banked.
+     *  A paused step (started_at null) has already banked its time, so it just closes. */
     protected function closeLog(StepLog $log, Carbon $now): void
     {
-        $segment = max(0, (int) round($log->started_at->diffInSeconds($now, true)));
+        $segment = $log->started_at !== null
+            ? max(0, (int) round($log->started_at->diffInSeconds($now, true)))
+            : 0;
 
         $log->update([
             'completed_at' => $now,
@@ -260,12 +296,17 @@ class RunController extends Controller
         $currentRow = $rows->firstWhere('is_current', true);
         $currentAverage = $currentRow['average'] ?? null;
 
+        // The current step is paused when its open log has no running segment (started_at null).
+        $isPaused = $openLog !== null && $openLog->started_at === null;
+
         // Seconds already on the current step at page load: any time it banked from a
-        // previous visit plus the current open segment. Server-computed, so client clock
-        // skew never affects the nudge threshold.
+        // previous visit or pause, plus the current open segment (zero while paused).
+        // Server-computed, so client clock skew never affects the nudge threshold.
         $currentElapsedAtLoad = $openLog
             ? (int) ($openLog->duration_seconds ?? 0)
-                + max(0, (int) round($openLog->started_at->diffInSeconds(Carbon::now(), true)))
+                + ($openLog->started_at !== null
+                    ? max(0, (int) round($openLog->started_at->diffInSeconds(Carbon::now(), true)))
+                    : 0)
             : 0;
 
         return view('flower::runs.active', [
@@ -276,6 +317,7 @@ class RunController extends Controller
             'total' => $total,
             'isLastStep' => $isLastStep,
             'canGoBack' => $canGoBack,
+            'isPaused' => $isPaused,
             'currentAverage' => $currentAverage,
             'currentElapsedAtLoad' => $currentElapsedAtLoad,
         ]);
