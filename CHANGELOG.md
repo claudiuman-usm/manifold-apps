@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.6.2] - 2026-09-28
+
+### Changed
+- My Music: larger docked-player transport buttons — round 46px prev/next/shuffle/close with a prominent 56px filled play/pause, scaling down slightly on mobile.
+
 ## [1.6.1] - 2026-09-28
 
 ### Added

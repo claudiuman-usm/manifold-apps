@@ -770,8 +770,21 @@ body.player-open .content { padding-bottom: 240px; }
 .player-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-sub { font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-keys { font-size: .72rem; margin-top: 6px; }
-.player-controls { display: flex; gap: 6px; flex: none; }
+.player-controls { display: flex; gap: 10px; flex: none; align-items: center; }
 .player-controls .active { color: var(--accent); border-color: var(--accent); }
+/* Bigger, round transport buttons; play/pause is the largest (primary). */
+.player-controls .btn {
+    width: 46px; height: 46px; padding: 0; border-radius: 50%;
+    font-size: 1.15rem; display: inline-flex; align-items: center; justify-content: center;
+}
+.player-controls #pl-toggle { width: 56px; height: 56px; font-size: 1.4rem; }
+/* The shuffle glyph renders small at a given font-size — nudge it up to match. */
+.player-controls #pl-shuffle { font-size: 1.5rem; }
+@media (max-width: 720px) {
+    .player-controls { gap: 6px; }
+    .player-controls .btn { width: 40px; height: 40px; font-size: 1.05rem; }
+    .player-controls #pl-toggle { width: 48px; height: 48px; font-size: 1.25rem; }
+}
 @media (max-width: 720px) {
     .player-frame { width: 168px; height: 94px; }
     .player-keys { display: none; }
