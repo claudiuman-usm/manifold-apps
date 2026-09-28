@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.5.1] - 2026-09-28
+
+### Fixed
+- My Music: the shared filter script is now served through the app (`assets/music-filter.js` route) like the CSS — on the cPanel shim, plain `public/js/…` files 404, which broke sync/filtering in production ("Cannot read properties of undefined (reading 'filter')").
+
 ## [1.5.0] - 2026-09-28
 
 ### Added

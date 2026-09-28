@@ -206,7 +206,7 @@
 
 @push('scripts')
 @if ($configured && $token)
-<script src="{{ asset('js/music-filter.js') }}?v={{ filemtime(public_path('js/music-filter.js')) }}"></script>
+<script src="{{ route('assets.music-filter') }}?v={{ filemtime(public_path('js/music-filter.js')) }}"></script>
 <script>
 (() => {
     'use strict';

@@ -24,4 +24,16 @@ class AssetController extends Controller
             'Cache-Control' => 'public, max-age=86400',
         ]);
     }
+
+    public function musicFilterJs(): Response
+    {
+        $path = public_path('js/music-filter.js');
+
+        abort_unless(is_file($path), 404);
+
+        return response(file_get_contents($path), 200, [
+            'Content-Type' => 'application/javascript; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
 }
