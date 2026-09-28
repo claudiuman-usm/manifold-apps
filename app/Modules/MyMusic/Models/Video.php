@@ -15,6 +15,7 @@ class Video extends Model
     protected $fillable = [
         'video_id', 'raw_title', 'channel_title', 'video_published_at',
         'liked_at', 'thumbnail', 'liked_position', 'is_music', 'embeddable', 'fetched_at',
+        'rating', 'play_count', 'last_played_at',
     ];
 
     protected $casts = [
@@ -23,6 +24,9 @@ class Video extends Model
         'fetched_at' => 'datetime',
         'is_music' => 'boolean',
         'embeddable' => 'boolean',
+        'rating' => 'integer',
+        'play_count' => 'integer',
+        'last_played_at' => 'datetime',
     ];
 
     public function track(): HasOne

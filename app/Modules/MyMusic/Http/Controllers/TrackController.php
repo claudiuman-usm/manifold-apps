@@ -3,6 +3,7 @@
 namespace App\Modules\MyMusic\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\MyMusic\Models\Play;
 use App\Modules\MyMusic\Models\Track;
 use App\Modules\MyMusic\Models\Video;
 use Illuminate\Http\Request;
@@ -60,5 +61,25 @@ class TrackController extends Controller
         $video->update(['embeddable' => false]);
 
         return response()->json(['embeddable' => false]);
+    }
+
+    /** Record a counted listen (fired once the player crosses the real-listen threshold). */
+    public function recordPlay(Video $video)
+    {
+        $video->increment('play_count');
+        $video->update(['last_played_at' => now()]);
+        Play::create(['video_id' => $video->video_id, 'played_at' => now()]);
+
+        return response()->json(['play_count' => $video->play_count]);
+    }
+
+    /** Set / clear the 0–3 star rating (rating stored on the video, the stable per-row entity). */
+    public function rate(Request $request, Video $video)
+    {
+        $data = $request->validate(['rating' => ['nullable', 'integer', 'between:0,3']]);
+        $rating = $data['rating'] ?? null;
+        $video->update(['rating' => $rating === 0 ? null : $rating]);
+
+        return response()->json(['rating' => $video->rating]);
     }
 }

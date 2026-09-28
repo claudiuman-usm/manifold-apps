@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.7.0] - 2026-09-28
+
+### Added
+- My Music: **play tracking, ratings & listening stats**.
+  - Passive **play counting** — a track counts as played once listened past ~30s (or half of a short one), read from the player's own progress so skips don't inflate it. Stored as a `music_plays` log plus denormalized counters on the video.
+  - **3-star ratings** per row (click the top star again to clear), with new Rated / ★★★ / ★★+ / Unrated / Never-played filters and sort-by rating/plays.
+  - **Stats page** (`/music/stats`): totals, top artists, genre-family and decade breakdowns, most-played, top-rated, and rediscovery-focused **Lost Favourites** (rated but long unplayed). All derived locally, no external cost.
+  - Optional **AI taste analysis** — sends the stats to Claude (reuses `ANTHROPIC_API_KEY`; `MUSIC_AI_MODEL` to override) for a taste-profile narrative + tracks worth revisiting; hidden when no key is set.
+
+### Changed
+- My Music: genres filter now collapses MusicBrainz's ~380 raw tags into ~12 browsable umbrella families via keyword rules (new tags self-classify; junk/nationality tags dropped); raw tags still shown per row.
+- My Music: dropdown panels are opaque and layer correctly above sibling sidebar islands (fixes see-through / behind-island rendering in dark mode).
+
 ## [1.6.2] - 2026-09-28
 
 ### Changed

@@ -61,10 +61,24 @@ Every call is logged to `music_quota_log`; playlist creation shows the estimate
 first, pauses automatically on `quotaExceeded`, and resumes from where it left
 off (Resume button on `/music/playlists`).
 
+## Play tracking, ratings & stats
+
+Playing a track past ~30s (or half of a short one) records a **play** — the
+docked player reads its own progress, so skips/previews don't inflate counts.
+Each row has a 3-star **rating** (stored on the video). The **Stats** page
+(`/music/stats`) derives everything locally (no external cost): top artists,
+genre families, decades, most/least-played, and rediscovery buckets
+(top-rated-but-unplayed "lost favourites"). An optional **AI taste analysis**
+button sends the stats to Claude (reuses `ANTHROPIC_API_KEY` from Receipts; set
+`MUSIC_AI_MODEL` to override) for a taste-profile narrative + tracks worth
+revisiting — hidden if no key is set.
+
 ## Tables
 
 `music_videos` (raw Liked items, insert-only sync, `is_music` + `embeddable`
 flags) · `music_tracks` (parsed + enriched, 1:1 by `video_id`) ·
 `music_playlists` + `music_playlist_items` (created playlists, remaining
 `queue`, stored `filter_json` for Sync) · `music_google_tokens` (encrypted
-OAuth) · `music_quota_log` (per-call quota spend, Pacific-dated).
+OAuth) · `music_quota_log` (per-call quota spend, Pacific-dated) ·
+`music_plays` (one row per counted listen, for time-based stats;
+`play_count`/`last_played_at`/`rating` also denormalized on `music_videos`).

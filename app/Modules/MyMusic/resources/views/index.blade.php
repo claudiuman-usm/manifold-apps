@@ -45,6 +45,7 @@
                         <button type="button" id="shuffle-btn" class="btn btn-ghost">⤨ {{ __('music::messages.library.shuffle') }}</button>
                         <button type="button" id="create-playlist" class="btn btn-ghost">＋ {{ __('music::messages.playlists.create') }}</button>
                         <a href="{{ route('music.playlists.index') }}" class="btn btn-ghost">{{ __('music::messages.playlists.view_all') }}</a>
+                        <a href="{{ route('music.stats') }}" class="btn btn-ghost">{{ __('music::messages.stats.nav') }}</a>
                     </div>
                 </div>
 
@@ -72,6 +73,15 @@
                             <option value="music">{{ __('music::messages.library.music_only') }}</option>
                             <option value="all">{{ __('music::messages.library.everything') }}</option>
                             <option value="non">{{ __('music::messages.library.non_music') }}</option>
+                        </select>
+                        <select id="f-rate" class="select">
+                            <option value="">{{ __('music::messages.library.any_rating') }}</option>
+                            <option value="rated">{{ __('music::messages.library.rated') }}</option>
+                            <option value="3">★★★</option>
+                            <option value="2">★★+</option>
+                            <option value="1">★+</option>
+                            <option value="unrated">{{ __('music::messages.library.unrated') }}</option>
+                            <option value="unplayed">{{ __('music::messages.library.unplayed') }}</option>
                         </select>
                         <button type="button" id="clear-filters" class="btn btn-sm btn-ghost">{{ __('music::messages.library.clear') }}</button>
                     </div>
@@ -127,6 +137,8 @@
                                     <th data-sort="al">{{ __('music::messages.columns.album') }}</th>
                                     <th data-sort="y" class="num-col">{{ __('music::messages.columns.year') }}</th>
                                     <th class="col-genres">{{ __('music::messages.columns.genres') }}</th>
+                                    <th data-sort="rt" class="cell-stars">{{ __('music::messages.columns.rating') }}</th>
+                                    <th data-sort="pc" class="num-col col-plays">{{ __('music::messages.columns.plays') }}</th>
                                     <th data-sort="c" class="col-channel">{{ __('music::messages.columns.channel') }}</th>
                                     <th></th>
                                 </tr>
@@ -285,6 +297,7 @@
         y1: params.get('y1') || '',
         status: params.get('status') || '',
         mus: params.get('mus') || 'music',
+        rate: params.get('rate') || '',
         sort: params.get('sort') || 'p',
         dir: params.get('dir') || 'asc',
     };
@@ -299,6 +312,7 @@
         if (state.y1) p.set('y1', state.y1);
         if (state.status) p.set('status', state.status);
         if (state.mus !== 'music') p.set('mus', state.mus);
+        if (state.rate) p.set('rate', state.rate);
         if (state.sort !== 'p' || state.dir !== 'asc') { p.set('sort', state.sort); p.set('dir', state.dir); }
         if (shuffle) p.set('shuffle', '1');
         history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
@@ -310,6 +324,15 @@
     /* ---------- Table rendering ---------- */
     let currentRows = [];
     const tbody = document.querySelector('#track-table tbody');
+
+    function starsHtml(r) {
+        let out = '';
+        for (let n = 1; n <= 3; n++) {
+            const on = (r.rt || 0) >= n;
+            out += `<button type="button" class="star${on ? ' on' : ''}" data-act="rate" data-n="${n}" title="${n} ★">${on ? '★' : '☆'}</button>`;
+        }
+        return out;
+    }
 
     function rowHtml(r, i) {
         const genres = (r.g || []).slice(0, 2).map((g) => `<span class="badge badge-sm">${esc(g)}</span>`).join(' ');
@@ -323,6 +346,8 @@
             <td class="muted cell-clamp cell-album" title="${esc(r.al || '')}">${esc(r.al || '')}</td>
             <td class="num-col">${r.y ?? ''}</td>
             <td class="col-genres">${genres}</td>
+            <td class="cell-stars">${starsHtml(r)}</td>
+            <td class="num-col col-plays muted">${r.pc || ''}</td>
             <td class="muted cell-channel col-channel">${esc(r.c || '')}</td>
             <td class="cell-actions">
                 <button type="button" class="rowbtn" data-act="play" title="${T.play}">▶</button>
@@ -360,7 +385,7 @@
             if (state.mus === 'music' && !r.m) return;
             const a = r.a || '—';
             artists.set(a, (artists.get(a) || 0) + 1);
-            (r.g || []).forEach((g) => genres.set(g, (genres.get(g) || 0) + 1));
+            (r.gf || []).forEach((g) => genres.set(g, (genres.get(g) || 0) + 1));
         });
         return {
             artists: [...artists.entries()].sort((a, b) => a[0].localeCompare(b[0])),
@@ -421,17 +446,19 @@
     $('f-y1').value = state.y1;
     $('f-status').value = state.status;
     $('f-mus').value = state.mus;
+    $('f-rate').value = state.rate;
 
     $('f-q').addEventListener('input', () => { state.q = $('f-q').value; render(); });
     $('f-y0').addEventListener('input', () => { state.y0 = $('f-y0').value; render(); });
     $('f-y1').addEventListener('input', () => { state.y1 = $('f-y1').value; render(); });
     $('f-status').addEventListener('change', () => { state.status = $('f-status').value; render(); });
     $('f-mus').addEventListener('change', () => { state.mus = $('f-mus').value; render(); });
+    $('f-rate').addEventListener('change', () => { state.rate = $('f-rate').value; render(); });
     $('clear-filters').addEventListener('click', () => {
-        Object.assign(state, { q: '', y0: '', y1: '', status: '', mus: 'music' });
+        Object.assign(state, { q: '', y0: '', y1: '', status: '', mus: 'music', rate: '' });
         state.artists.clear(); state.genres.clear();
         $('f-q').value = $('f-y0').value = $('f-y1').value = '';
-        $('f-status').value = ''; $('f-mus').value = 'music';
+        $('f-status').value = ''; $('f-mus').value = 'music'; $('f-rate').value = '';
         msArtist.refreshBtn(); msGenre.refreshBtn();
         render();
     });
@@ -486,9 +513,12 @@
         });
     }
 
+    let playCounted = false; // reset per track; a play is counted once it's really listened to
+
     function play(videoId) {
         const row = DATA.find((r) => r.v === videoId);
         playerState.videoId = videoId;
+        playCounted = false;
         $('player-bar').classList.remove('hidden');
         document.body.classList.add('player-open');
         const art = $('player-art');
@@ -589,8 +619,25 @@
             seek.value = Math.floor(info.currentTime);
             $('time-now').textContent = fmtTime(info.currentTime);
             updateSeekFill();
+            maybeCountPlay(info.currentTime, info.duration);
         }
     });
+
+    // A "play" counts once the listener passes 30s (or half of a short track) —
+    // so skips and previews don't inflate the numbers. Once per track load.
+    function maybeCountPlay(t, dur) {
+        if (playCounted || playerState.videoId === null) return;
+        const threshold = Math.min(30, (dur || 60) * 0.5);
+        if (t < threshold) return;
+        playCounted = true;
+        const row = DATA.find((r) => r.v === playerState.videoId);
+        if (!row) return;
+        api(`${URLS.videos}/${row.vid}/played`, 'POST').then((d) => {
+            row.pc = d.play_count;
+            const tr = tbody.querySelector(`tr[data-v="${CSS.escape(row.v)}"] .col-plays`);
+            if (tr) tr.textContent = row.pc || '';
+        }).catch(() => {});
+    }
 
     document.addEventListener('keydown', (e) => {
         const el = document.activeElement;
@@ -614,6 +661,16 @@
 
         if (btn.dataset.act === 'play') play(row.v);
         else if (btn.dataset.act === 'edit') openEdit(row);
+        else if (btn.dataset.act === 'rate') {
+            // Click the same star that's already the max → clear the rating.
+            const n = +btn.dataset.n;
+            const next = row.rt === n ? 0 : n;
+            api(`${URLS.videos}/${row.vid}/rate`, 'POST', { rating: next }).then((d) => {
+                row.rt = d.rating || 0;
+                const cell = tr.querySelector('.cell-stars');
+                if (cell) cell.innerHTML = starsHtml(row);
+            }).catch(() => {});
+        }
         else if (btn.dataset.act === 'restore') {
             // Only offered in the Non-music view: move the track back to Music.
             api(`${URLS.videos}/${row.vid}/toggle-music`, 'POST').then((d) => {

@@ -58,6 +58,10 @@ return [
         'search_list' => 'Tastează pentru a filtra…',
         'undo' => 'Anulează',
         'non_music_marked' => '„:title” a fost marcată ca non-muzică și a ieșit din această listă.',
+        'any_rating' => 'Orice notă',
+        'rated' => 'Notate',
+        'unrated' => 'Nenotate',
+        'unplayed' => 'Neascultate',
     ],
 
     'side' => [
@@ -73,6 +77,8 @@ return [
         'album' => 'Album',
         'year' => 'An',
         'genres' => 'Genuri',
+        'rating' => 'Notă',
+        'plays' => 'Redări',
         'channel' => 'Canal',
     ],
 
@@ -144,6 +150,32 @@ return [
             'ready' => 'Gata',
             'quota_paused' => 'Pauză (cotă)',
         ],
+    ],
+
+    'stats' => [
+        'heading' => 'Statistici ascultare',
+        'subheading' => 'Ce asculți și ce ai neglijat.',
+        'back' => 'Înapoi la bibliotecă',
+        'nav' => 'Statistici',
+        'total_plays' => 'Redări totale',
+        'this_month' => 'luna aceasta',
+        'tracks_played' => 'piese redate',
+        'tracks_rated' => 'piese notate',
+        'top_artists' => 'Top artiști',
+        'by_genre' => 'După gen',
+        'by_decade' => 'După deceniu',
+        'most_played' => 'Cele mai redate',
+        'lost_favorites' => 'Favorite uitate',
+        'lost_hint' => 'Notate ★★+ dar neascultate demult — reascultă-le.',
+        'top_rated' => 'Cele mai bine notate',
+        'plays' => 'redări',
+        'never' => 'niciodată',
+        'empty' => 'Ascultă niște muzică și statisticile se vor completa.',
+        'ai_heading' => 'Analiză AI a gustului',
+        'ai_hint' => 'Claude îți citește statisticile și scrie un profil de gust cu piese de reascultat.',
+        'ai_run' => 'Analizează-mi gustul',
+        'ai_running' => 'Se analizează…',
+        'ai_unavailable' => 'Analiza AI e indisponibilă (setează ANTHROPIC_API_KEY).',
     ],
 
     'flash' => [

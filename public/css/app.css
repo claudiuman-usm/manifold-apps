@@ -727,7 +727,9 @@ body.ctx-music {
 .ms { position: relative; }
 .ms-btn { cursor: pointer; min-width: 120px; text-align: left; }
 .ms-btn.active { border-color: var(--accent); color: var(--accent); font-weight: 700; }
-.ms-panel { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; width: 260px; max-height: 320px; display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r-el); background: var(--panel); border: 1px solid var(--panel-border); box-shadow: 0 14px 34px rgba(20, 18, 30, .18); }
+/* Opaque dropdown: the panel tint over the solid --page color so the list
+   never shows the fields/selects behind it (--panel alone is translucent). */
+.ms-panel { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; width: 260px; max-height: 320px; display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r-el); background: linear-gradient(var(--panel-strong), var(--panel-strong)), var(--page); border: 1px solid var(--panel-border); box-shadow: 0 14px 34px rgba(20, 18, 30, .28); }
 .ms-list { overflow-y: auto; }
 .ms-item { display: flex; gap: 8px; align-items: center; padding: 5px 6px; border-radius: 8px; font-size: .86rem; cursor: pointer; }
 .ms-item:hover { background: var(--accent-soft); }
@@ -809,6 +811,10 @@ body.player-open .content { padding-bottom: 240px; }
 .island-stack .btn, .island .input, .island .select { width: 100%; box-sizing: border-box; }
 .island .ms-btn { width: 100%; }
 .island .ms-panel { width: 100%; min-width: 240px; }
+/* Each island is its own stacking context (backdrop-filter), so a later island
+   would paint over an open dropdown. Raise the island that owns an open panel. */
+.music-side .island { position: relative; }
+.music-side .island:has(.ms-panel:not(.hidden)) { z-index: 50; }
 .island-line { margin-bottom: 6px; font-size: .88rem; }
 .stat-inline { font-size: 1.5rem; font-weight: 300; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-right: 6px; }
 .island .enrich-bar { margin: 8px 0 4px; }
@@ -922,3 +928,30 @@ body.player-open .music-side { max-height: none; }
     background: var(--accent); border: 0;
 }
 .seek::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--accent); border: 0; }
+
+/* ---- My Music: rating stars + plays column ---- */
+.cell-stars { white-space: nowrap; }
+.star { border: 0; background: none; cursor: pointer; padding: 0 1px; font-size: 1rem; line-height: 1; color: var(--text-3); }
+.star.on { color: #f5b53d; }
+.star:hover { color: #f5b53d; }
+th.cell-stars { cursor: pointer; }
+.col-plays { min-width: 2.5em; }
+@container (max-width: 900px) { .music-table .col-plays { display: none; } }
+
+/* ---- My Music: stats page ---- */
+.stats-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 18px; }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.stats-h { font-size: .78rem; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); font-weight: 800; margin: 0 0 12px; }
+.bar-row { display: grid; grid-template-columns: 120px 1fr 40px; align-items: center; gap: 10px; margin-bottom: 8px; font-size: .88rem; }
+.bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 8px; border-radius: 99px; background: var(--panel-2); overflow: hidden; }
+.bar-fill { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
+.bar-num { text-align: right; color: var(--text-3); font-size: .82rem; }
+.track-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--panel-border); }
+.track-row:last-child { border-bottom: 0; }
+.track-main { min-width: 0; }
+.track-title { font-weight: 600; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track-artist { font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.track-metric { flex: none; font-size: .82rem; }
+.stars-static { color: #f5b53d; letter-spacing: 1px; }
+.ai-out { margin-top: 14px; padding: 14px 16px; border-radius: var(--r-el); background: var(--accent-soft); white-space: pre-wrap; line-height: 1.55; font-size: .92rem; }

@@ -58,6 +58,10 @@ return [
         'search_list' => 'Type to filter…',
         'undo' => 'Undo',
         'non_music_marked' => '“:title” was marked non-music and left this view.',
+        'any_rating' => 'Any rating',
+        'rated' => 'Rated',
+        'unrated' => 'Unrated',
+        'unplayed' => 'Never played',
     ],
 
     'side' => [
@@ -73,6 +77,8 @@ return [
         'album' => 'Album',
         'year' => 'Year',
         'genres' => 'Genres',
+        'rating' => 'Rating',
+        'plays' => 'Plays',
         'channel' => 'Channel',
     ],
 
@@ -144,6 +150,32 @@ return [
             'ready' => 'Ready',
             'quota_paused' => 'Paused (quota)',
         ],
+    ],
+
+    'stats' => [
+        'heading' => 'Listening stats',
+        'subheading' => 'What you play, and what you’ve been neglecting.',
+        'back' => 'Back to library',
+        'nav' => 'Stats',
+        'total_plays' => 'Total plays',
+        'this_month' => 'this month',
+        'tracks_played' => 'tracks played',
+        'tracks_rated' => 'tracks rated',
+        'top_artists' => 'Top artists',
+        'by_genre' => 'By genre',
+        'by_decade' => 'By decade',
+        'most_played' => 'Most played',
+        'lost_favorites' => 'Lost favourites',
+        'lost_hint' => 'Rated ★★+ but not played in a long time — go re-listen.',
+        'top_rated' => 'Top rated',
+        'plays' => 'plays',
+        'never' => 'never',
+        'empty' => 'Play some music and the stats will fill in.',
+        'ai_heading' => 'AI taste analysis',
+        'ai_hint' => 'Claude reads your stats and writes a taste profile with tracks worth revisiting.',
+        'ai_run' => 'Analyze my taste',
+        'ai_running' => 'Analyzing…',
+        'ai_unavailable' => 'AI analysis is unavailable (set ANTHROPIC_API_KEY).',
     ],
 
     'flash' => [

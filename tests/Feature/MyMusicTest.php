@@ -162,6 +162,21 @@ class MyMusicTest extends TestCase
         }
     }
 
+    public function test_genre_families_roll_up_and_auto_classify(): void
+    {
+        $f = \App\Modules\MyMusic\Support\GenreFamilies::familiesFor(['pop rock', 'trip hop']);
+        $this->assertContains('Pop', $f);
+        $this->assertContains('Rock', $f);
+        $this->assertContains('Electronic', $f);
+
+        // Unseen future tags self-classify by keyword stem.
+        $this->assertSame(['Rock'], \App\Modules\MyMusic\Support\GenreFamilies::familiesFor(['post-rock']));
+        $this->assertSame(['Soul / R&B'], \App\Modules\MyMusic\Support\GenreFamilies::familiesFor(['future funk']));
+
+        // Junk / nationality tags are dropped.
+        $this->assertSame([], \App\Modules\MyMusic\Support\GenreFamilies::familiesFor(['seen live', 'romanian band']));
+    }
+
     public function test_parser_does_not_corrupt_trailing_emoji(): void
     {
         $p = TitleParser::parse('아티스트 - 곡명⚽️🏻', 'Some - Topic');
@@ -288,6 +303,48 @@ class MyMusicTest extends TestCase
             ->assertOk()
             ->assertSee('Road trip')
             ->assertSee('music.youtube.com/playlist?list=PL9');
+    }
+
+    public function test_recording_a_play_increments_count_and_logs(): void
+    {
+        $this->connect();
+        $video = Video::create(['video_id' => 'pv1', 'raw_title' => 'x - y', 'fetched_at' => now()]);
+
+        $this->actingAs($this->user)->postJson(route('music.videos.played', $video))
+            ->assertOk()->assertJson(['play_count' => 1]);
+        $this->actingAs($this->user)->postJson(route('music.videos.played', $video))
+            ->assertJson(['play_count' => 2]);
+
+        $this->assertSame(2, $video->fresh()->play_count);
+        $this->assertNotNull($video->fresh()->last_played_at);
+        $this->assertSame(2, \App\Modules\MyMusic\Models\Play::where('video_id', 'pv1')->count());
+    }
+
+    public function test_rating_sets_and_clears(): void
+    {
+        $this->connect();
+        $video = Video::create(['video_id' => 'rv1', 'raw_title' => 'x - y', 'fetched_at' => now()]);
+
+        $this->actingAs($this->user)->postJson(route('music.videos.rate', $video), ['rating' => 3])
+            ->assertOk()->assertJson(['rating' => 3]);
+        $this->assertSame(3, $video->fresh()->rating);
+
+        // Rating 0 clears it.
+        $this->actingAs($this->user)->postJson(route('music.videos.rate', $video), ['rating' => 0])
+            ->assertJson(['rating' => null]);
+        $this->assertNull($video->fresh()->rating);
+    }
+
+    public function test_stats_page_renders(): void
+    {
+        $this->connect();
+        $video = Video::create(['video_id' => 'sv1', 'raw_title' => 'x - y', 'fetched_at' => now(), 'play_count' => 5]);
+        Track::create(['video_id' => 'sv1', 'artist' => 'Someone', 'title' => 'A Song', 'year' => 1999, 'genres' => ['indie rock'], 'enrich_status' => 'ok']);
+
+        $this->actingAs($this->user)->get(route('music.stats'))
+            ->assertOk()
+            ->assertSee('Listening stats')
+            ->assertSee('Someone');
     }
 
     public function test_not_embeddable_flag_is_persisted(): void

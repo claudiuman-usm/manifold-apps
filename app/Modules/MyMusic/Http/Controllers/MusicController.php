@@ -55,12 +55,15 @@ class MusicController extends Controller
                 'al' => $v->track?->album,
                 'y' => $v->track?->year,
                 'g' => $v->track?->genres ?? [],
+                'gf' => \App\Modules\MyMusic\Support\GenreFamilies::familiesFor($v->track?->genres ?? []),
                 'c' => $v->channel_title,
                 's' => $v->track?->enrich_status ?? 'pending',
                 'm' => $v->is_music,
                 'e' => $v->embeddable,
                 'p' => $v->liked_position,
                 'th' => $v->thumbnail,
+                'rt' => $v->rating,
+                'pc' => $v->play_count,
             ])
             ->values();
     }

@@ -18,4 +18,11 @@ return [
 
     // MusicBrainz requires a descriptive User-Agent with contact info; 1 request/sec max.
     'musicbrainz_agent' => env('MUSIC_MB_AGENT', 'ManifoldApps-MyMusic/1.0 (claudiu.man@gmail.com)'),
+
+    // AI taste analysis (optional) — reuses the Anthropic key shared with Receipts.
+    // When empty, the Stats page hides the "Analyze my taste" feature.
+    'ai' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('MUSIC_AI_MODEL', 'claude-opus-4-8'),
+    ],
 ];

@@ -16,8 +16,15 @@ window.MusicFilter = (() => {
             if (mus === 'music' && !r.m) return false;
             if (mus === 'non' && r.m) return false;
             if (s.status && r.s !== s.status) return false;
+            if (s.rate) {
+                const rt = r.rt || 0;
+                if (s.rate === 'rated' && rt === 0) return false;
+                else if (s.rate === 'unrated' && rt > 0) return false;
+                else if (s.rate === 'unplayed' && (r.pc || 0) > 0) return false;
+                else if (/^[123]$/.test(s.rate) && rt < +s.rate) return false;
+            }
             if (artists.size && !artists.has(r.a || '—')) return false;
-            if (genres.size && !(r.g || []).some((g) => genres.has(g))) return false;
+            if (genres.size && !(r.gf || []).some((g) => genres.has(g))) return false;
             if ((y0 || y1) && (r.y == null || (y0 && r.y < y0) || (y1 && r.y > y1))) return false;
             if (q) {
                 const hay = `${r.a || ''} ${r.ti || ''} ${r.al || ''} ${r.c || ''}`.toLowerCase();
