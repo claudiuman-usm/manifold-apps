@@ -5,6 +5,7 @@
     $stops = match ($ctx) {
         'ctx-flower' => ['#5eead4', '#10b6a4', '#67e8f9'],
         'ctx-receipts' => ['#fcd34d', '#f59e0b', '#ea7317'],
+        'ctx-music' => ['#f9a8d4', '#ec4899', '#c084fc'],
         default => ['#c4b5fd', '#7b6cf6', '#f9a8d4'],
     };
     $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">'

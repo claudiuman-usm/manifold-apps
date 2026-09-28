@@ -1,0 +1,162 @@
+<?php
+
+return [
+    'title' => 'My Music',
+
+    'index' => [
+        'heading' => 'My Music',
+        'subheading' => 'Your liked YouTube music, organized.',
+        'videos' => 'liked videos',
+        'last_sync' => 'Last sync',
+        'never' => 'never',
+        'sync' => 'Sync liked videos',
+        'syncing' => 'Syncing…',
+        'sync_progress' => ':scanned scanned · :inserted new',
+        'sync_done' => 'Sync complete — :inserted new, :total total.',
+        'sync_failed' => 'Sync failed: :message',
+        'quota' => 'API quota today',
+        'units' => 'units',
+    ],
+
+    'connect' => [
+        'heading' => 'Connect YouTube',
+        'hint' => 'Sign in with Google to read your Liked videos and create playlists. Tokens stay in this app, revocable anytime from your Google account.',
+        'button' => 'Connect Google account',
+        'connected_as' => 'Connected as',
+        'disconnect' => 'Disconnect',
+        'disconnect_confirm' => 'Disconnect the Google account? Synced videos stay.',
+        'not_configured' => 'Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env first — see the README for the Google Cloud steps.',
+    ],
+
+    'enrich' => [
+        'heading' => 'Enrichment',
+        'progress' => ':done of :total identified · :pending pending',
+        'run' => 'Enrich now',
+        'running' => 'Enriching… :pending left',
+        'hint' => 'MusicBrainz allows 1 lookup per second, so this runs in small chunks. The server cron keeps going even with this page closed.',
+        'failed' => 'Enrichment stopped: :message',
+    ],
+
+    'library' => [
+        'search' => 'Search artist, title, album, channel…',
+        'artist' => 'Artist',
+        'genre' => 'Genre',
+        'year_from' => 'Year from',
+        'year_to' => 'to',
+        'status' => 'Status',
+        'all_statuses' => 'All statuses',
+        'music_only' => 'Music',
+        'everything' => 'All videos',
+        'non_music' => 'Non-music',
+        'play_all' => 'Play all',
+        'shuffle' => 'Shuffle',
+        'count' => ':shown tracks match your filters, out of :total liked videos.',
+        'empty' => 'Nothing matches these filters.',
+        'none' => 'No videos yet — run your first sync above.',
+        'clear' => 'Clear filters',
+        'no_embed' => 'no embed',
+        'search_list' => 'Type to filter…',
+        'undo' => 'Undo',
+        'non_music_marked' => '“:title” was marked non-music and left this view.',
+    ],
+
+    'side' => [
+        'search' => 'Search',
+        'filters' => 'Filters',
+        'actions' => 'Actions',
+        'status' => 'Sync & enrichment',
+    ],
+
+    'columns' => [
+        'artist' => 'Artist',
+        'title' => 'Title',
+        'album' => 'Album',
+        'year' => 'Year',
+        'genres' => 'Genres',
+        'channel' => 'Channel',
+    ],
+
+    'status_labels' => [
+        'pending' => 'Pending',
+        'ok' => 'Enriched',
+        'not_found' => 'Not found',
+        'manual' => 'Manual',
+        'skipped' => 'Non-music',
+    ],
+
+    'actions' => [
+        'play' => 'Play',
+        'open' => 'Open in YouTube Music',
+        'edit' => 'Edit',
+        'toggle' => 'Mark as music / non-music (non-music is hidden from the Music view)',
+    ],
+
+    'edit' => [
+        'heading' => 'Edit track',
+        'artist' => 'Artist',
+        'track_title' => 'Title',
+        'album' => 'Album',
+        'year' => 'Year',
+        'genres' => 'Genres (comma-separated)',
+        'save' => 'Save',
+        'cancel' => 'Cancel',
+        'failed' => 'Save failed — check the fields.',
+    ],
+
+    'player' => [
+        'prev' => 'Previous',
+        'play' => 'Play / pause',
+        'next' => 'Next',
+        'shuffle' => 'Shuffle',
+        'close' => 'Close player',
+        'keys' => 'space play/pause · ← prev · → next',
+    ],
+
+    'playlists' => [
+        'heading' => 'Playlists',
+        'subheading' => 'Real YouTube playlists, built from your filters.',
+        'back' => 'Back to library',
+        'view_all' => 'Playlists',
+        'create' => 'Create playlist',
+        'name' => 'Playlist name',
+        'tracks' => ':n tracks',
+        'estimate' => 'quota cost ~:units units (:remaining left today)',
+        'estimate_warn' => 'That is more than today’s remaining quota — creation will pause partway and can be resumed tomorrow.',
+        'creating' => 'Adding tracks… :inserted of :total',
+        'paused' => 'Daily quota exhausted — resume tomorrow (resets midnight Pacific).',
+        'done' => 'Playlist ready.',
+        'empty' => 'No playlists yet — filter the library and hit “Create playlist”.',
+        'open' => 'YT Music',
+        'play' => 'Play',
+        'resume' => 'Resume',
+        'sync' => 'Sync',
+        'delete' => 'Delete',
+        'delete_confirm' => 'Remove this playlist from the app? The playlist on YouTube stays.',
+        'inserted' => ':n added',
+        'queued' => ':n queued',
+        'failed' => ':n skipped',
+        'synced' => ':n new tracks queued',
+        'last_synced' => 'synced',
+        'status' => [
+            'pending' => 'Pending',
+            'creating' => 'In progress',
+            'ready' => 'Ready',
+            'quota_paused' => 'Paused (quota)',
+        ],
+    ],
+
+    'flash' => [
+        'connected' => 'Google account connected.',
+        'disconnected' => 'Google account disconnected.',
+    ],
+
+    'errors' => [
+        'not_configured' => 'Google OAuth is not configured (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).',
+        'not_connected' => 'No Google account connected.',
+        'oauth_exchange' => 'Could not exchange the Google sign-in code. Try connecting again.',
+        'oauth_denied' => 'Google sign-in was cancelled.',
+        'refresh' => 'Google session expired — please connect again.',
+        'quota' => 'YouTube API daily quota exhausted. It resets at midnight Pacific time.',
+        'api' => 'YouTube API error (:reason).',
+    ],
+];

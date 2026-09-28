@@ -1,0 +1,162 @@
+<?php
+
+return [
+    'title' => 'Muzica mea',
+
+    'index' => [
+        'heading' => 'Muzica mea',
+        'subheading' => 'Muzica ta din Liked pe YouTube, organizată.',
+        'videos' => 'videouri apreciate',
+        'last_sync' => 'Ultima sincronizare',
+        'never' => 'niciodată',
+        'sync' => 'Sincronizează Liked',
+        'syncing' => 'Se sincronizează…',
+        'sync_progress' => ':scanned parcurse · :inserted noi',
+        'sync_done' => 'Sincronizare completă — :inserted noi, :total în total.',
+        'sync_failed' => 'Sincronizarea a eșuat: :message',
+        'quota' => 'Cotă API azi',
+        'units' => 'unități',
+    ],
+
+    'connect' => [
+        'heading' => 'Conectează YouTube',
+        'hint' => 'Autentifică-te cu Google pentru a citi videourile Liked și a crea playlisturi. Tokenurile rămân în aplicație și pot fi revocate oricând din contul Google.',
+        'button' => 'Conectează contul Google',
+        'connected_as' => 'Conectat ca',
+        'disconnect' => 'Deconectează',
+        'disconnect_confirm' => 'Deconectezi contul Google? Videourile sincronizate rămân.',
+        'not_configured' => 'Setează întâi GOOGLE_CLIENT_ID și GOOGLE_CLIENT_SECRET în .env — pașii sunt în README.',
+    ],
+
+    'enrich' => [
+        'heading' => 'Îmbogățire',
+        'progress' => ':done din :total identificate · :pending în așteptare',
+        'run' => 'Îmbogățește acum',
+        'running' => 'Se îmbogățește… :pending rămase',
+        'hint' => 'MusicBrainz permite 1 căutare pe secundă, deci rulează în pași mici. Cronul de pe server continuă și cu pagina închisă.',
+        'failed' => 'Îmbogățirea s-a oprit: :message',
+    ],
+
+    'library' => [
+        'search' => 'Caută artist, titlu, album, canal…',
+        'artist' => 'Artist',
+        'genre' => 'Gen',
+        'year_from' => 'Din anul',
+        'year_to' => 'până în',
+        'status' => 'Stare',
+        'all_statuses' => 'Toate stările',
+        'music_only' => 'Muzică',
+        'everything' => 'Toate videourile',
+        'non_music' => 'Non-muzică',
+        'play_all' => 'Redă tot',
+        'shuffle' => 'Amestecă',
+        'count' => ':shown piese trec de filtre, din :total videouri Liked.',
+        'empty' => 'Nimic nu se potrivește cu filtrele.',
+        'none' => 'Niciun video încă — rulează prima sincronizare mai sus.',
+        'clear' => 'Șterge filtrele',
+        'no_embed' => 'fără embed',
+        'search_list' => 'Tastează pentru a filtra…',
+        'undo' => 'Anulează',
+        'non_music_marked' => '„:title” a fost marcată ca non-muzică și a ieșit din această listă.',
+    ],
+
+    'side' => [
+        'search' => 'Căutare',
+        'filters' => 'Filtre',
+        'actions' => 'Acțiuni',
+        'status' => 'Sincronizare & îmbogățire',
+    ],
+
+    'columns' => [
+        'artist' => 'Artist',
+        'title' => 'Titlu',
+        'album' => 'Album',
+        'year' => 'An',
+        'genres' => 'Genuri',
+        'channel' => 'Canal',
+    ],
+
+    'status_labels' => [
+        'pending' => 'În așteptare',
+        'ok' => 'Îmbogățit',
+        'not_found' => 'Negăsit',
+        'manual' => 'Manual',
+        'skipped' => 'Non-muzică',
+    ],
+
+    'actions' => [
+        'play' => 'Redă',
+        'open' => 'Deschide în YouTube Music',
+        'edit' => 'Editează',
+        'toggle' => 'Marchează muzică / non-muzică (non-muzica e ascunsă din lista Muzică)',
+    ],
+
+    'edit' => [
+        'heading' => 'Editează piesa',
+        'artist' => 'Artist',
+        'track_title' => 'Titlu',
+        'album' => 'Album',
+        'year' => 'An',
+        'genres' => 'Genuri (separate prin virgulă)',
+        'save' => 'Salvează',
+        'cancel' => 'Anulează',
+        'failed' => 'Salvarea a eșuat — verifică câmpurile.',
+    ],
+
+    'player' => [
+        'prev' => 'Anterior',
+        'play' => 'Redă / pauză',
+        'next' => 'Următor',
+        'shuffle' => 'Amestecă',
+        'close' => 'Închide playerul',
+        'keys' => 'spațiu redă/pauză · ← anterior · → următor',
+    ],
+
+    'playlists' => [
+        'heading' => 'Playlisturi',
+        'subheading' => 'Playlisturi reale pe YouTube, construite din filtrele tale.',
+        'back' => 'Înapoi la bibliotecă',
+        'view_all' => 'Playlisturi',
+        'create' => 'Creează playlist',
+        'name' => 'Numele playlistului',
+        'tracks' => ':n piese',
+        'estimate' => 'cost cotă ~:units unități (:remaining rămase azi)',
+        'estimate_warn' => 'E mai mult decât cota rămasă azi — crearea se va opri pe parcurs și poate fi reluată mâine.',
+        'creating' => 'Se adaugă piese… :inserted din :total',
+        'paused' => 'Cota zilnică e epuizată — reia mâine (se resetează la miezul nopții, ora Pacificului).',
+        'done' => 'Playlist gata.',
+        'empty' => 'Niciun playlist încă — filtrează biblioteca și apasă „Creează playlist”.',
+        'open' => 'YT Music',
+        'play' => 'Redă',
+        'resume' => 'Reia',
+        'sync' => 'Sincronizează',
+        'delete' => 'Șterge',
+        'delete_confirm' => 'Ștergi playlistul din aplicație? Playlistul de pe YouTube rămâne.',
+        'inserted' => ':n adăugate',
+        'queued' => ':n în coadă',
+        'failed' => ':n sărite',
+        'synced' => ':n piese noi în coadă',
+        'last_synced' => 'sincronizat',
+        'status' => [
+            'pending' => 'În așteptare',
+            'creating' => 'În curs',
+            'ready' => 'Gata',
+            'quota_paused' => 'Pauză (cotă)',
+        ],
+    ],
+
+    'flash' => [
+        'connected' => 'Cont Google conectat.',
+        'disconnected' => 'Cont Google deconectat.',
+    ],
+
+    'errors' => [
+        'not_configured' => 'OAuth Google neconfigurat (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).',
+        'not_connected' => 'Niciun cont Google conectat.',
+        'oauth_exchange' => 'Codul de autentificare Google nu a putut fi schimbat. Încearcă din nou.',
+        'oauth_denied' => 'Autentificarea Google a fost anulată.',
+        'refresh' => 'Sesiunea Google a expirat — conectează-te din nou.',
+        'quota' => 'Cota zilnică YouTube API e epuizată. Se resetează la miezul nopții, ora Pacificului.',
+        'api' => 'Eroare YouTube API (:reason).',
+    ],
+];

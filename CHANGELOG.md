@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.5.0] - 2026-09-28
+
+### Added
+- **My Music** — new module (`/music`, pink card): organizes the music in your YouTube Liked videos and turns filtered sets into real YouTube playlists.
+  - **Connect + sync**: Google OAuth (web flow, tokens stored encrypted, revocable), chunked insert-only sync of the Liked playlist ("LL") with live progress; every YouTube API call's quota cost is logged against the 10,000-unit daily budget (shown in the status strip, Pacific-midnight reset).
+  - **Parse + enrich**: artist/title parsed from raw titles ("Artist - Title" dash/pipe variants, "Title (Artist)", tag stripping, ft./feat. handling, "- Topic"/VEVO channel fallback); non-music videos auto-flagged with a per-row ♪ toggle. MusicBrainz enrichment (album, year, genres) at the polite 1 req/sec — runs from the UI in chunks or unattended via the `music:enrich` cron; manual edits (✎) are never overwritten.
+  - **Library**: filterable table (search, multi-artist, multi-genre, year range, status, music/non-music) with sortable columns and filters persisted in the URL; docked YouTube player with auto-advance through the current filter, shuffle, keyboard controls (space/←/→) and automatic skip + flag of non-embeddable videos; per-row jump to YouTube Music.
+  - **Playlists**: create a private YouTube playlist from any filter (quota estimate + warning up front, chunked inserts with progress, automatic pause on quotaExceeded with Resume); Sync re-runs the stored filter and appends only missing tracks; playlists page with YT Music link and in-app playlist player.
+  - **Sidebar layout**: search, filters, actions, and sync/enrichment status live in sidebar islands; the track table gets the full main column, with cover art per row, pinned row-actions, and columns that collapse to fit the available width (container queries).
+  - The docked player shows the track **artwork** instead of the video (the video keeps playing underneath), and switching the **theme no longer reloads the page mid-playback** — the music keeps going.
+  - Module docs in `app/Modules/MyMusic/README.md` (Google Cloud setup, cron line, quota math).
+
 ## [1.4.2] - 2026-08-09
 
 ### Fixed

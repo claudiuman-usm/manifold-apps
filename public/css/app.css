@@ -688,3 +688,208 @@ body.ctx-receipts {
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 }
+
+/* ---- My Music context (pink) ---- */
+body.ctx-music {
+    --accent: #db2777;
+    --accent-solid: #be185d;
+    --accent-2: #f472b6;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(219, 39, 119, .14);
+    --ring: rgba(190, 24, 93, .30);
+    --page: #fdf1f7;
+    --orb-1: #f9a8d4;
+    --orb-2: #fda4af;
+    --orb-3: #e9d5ff;
+}
+:root[data-theme="dark"] body.ctx-music {
+    --page: #170a11;
+    --accent: #f472b6;
+    --accent-solid: #f472b6;
+    --accent-ink: #2b0919;
+    --accent-soft: rgba(244, 114, 182, .16);
+    --ring: rgba(244, 114, 182, .30);
+}
+
+/* ---- My Music: status strip ---- */
+.hidden { display: none !important; }
+.music-status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; align-items: start; }
+.music-status-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; text-align: right; }
+.stat-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); font-weight: 800; }
+.stat-num { font-size: 2.1rem; font-weight: 300; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.stat-sub { font-size: 1rem; color: var(--text-3); }
+.enrich-bar { height: 8px; border-radius: 99px; background: var(--panel-2); margin: 10px 0 6px; overflow: hidden; }
+.enrich-bar span { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--accent); transition: width .3s; }
+
+/* ---- My Music: filters ---- */
+.music-filter-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.music-year { width: 110px; }
+.ms { position: relative; }
+.ms-btn { cursor: pointer; min-width: 120px; text-align: left; }
+.ms-btn.active { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.ms-panel { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; width: 260px; max-height: 320px; display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--r-el); background: var(--panel); border: 1px solid var(--panel-border); box-shadow: 0 14px 34px rgba(20, 18, 30, .18); }
+.ms-list { overflow-y: auto; }
+.ms-item { display: flex; gap: 8px; align-items: center; padding: 5px 6px; border-radius: 8px; font-size: .86rem; cursor: pointer; }
+.ms-item:hover { background: var(--accent-soft); }
+.ms-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-item em { font-style: normal; color: var(--text-3); font-size: .76rem; }
+
+/* ---- My Music: table ---- */
+.music-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.music-table th, .music-table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--panel-border); }
+.music-table th { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); user-select: none; white-space: nowrap; }
+.music-table th[data-sort] { cursor: pointer; }
+.music-table th[data-sort]:hover { color: var(--accent); }
+.music-table th.sorted { color: var(--accent); }
+.music-table th.sorted[data-dir="asc"]::after { content: " ↑"; }
+.music-table th.sorted[data-dir="desc"]::after { content: " ↓"; }
+.music-table tbody tr:hover { background: var(--accent-soft); }
+.music-table tr.playing { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.music-table tr.row-nonmusic { opacity: .55; }
+.music-table .num-col { text-align: right; font-variant-numeric: tabular-nums; width: 1%; white-space: nowrap; }
+.cell-title { font-weight: 600; }
+.cell-channel { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cell-actions { white-space: nowrap; text-align: right; }
+.rowbtn { display: inline-block; border: 0; background: none; cursor: pointer; padding: 3px 6px; border-radius: 8px; color: var(--text-3); font: inherit; font-size: .9rem; text-decoration: none; }
+.rowbtn:hover { color: var(--accent); background: var(--accent-soft); }
+.rowbtn.active { color: var(--accent); }
+.badge-sm { padding: 2px 8px; font-size: .68rem; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; background: var(--text-3); }
+.dot-ok { background: var(--success); }
+.dot-manual { background: var(--accent); }
+.dot-not_found { background: var(--warning); }
+.dot-pending { background: var(--text-3); }
+.dot-skipped { background: var(--panel-border); }
+
+/* ---- My Music: docked player ---- */
+.player-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; gap: 16px; align-items: center; padding: 12px 20px; background: var(--panel); border-top: 1px solid var(--panel-border); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+body.player-open .content { padding-bottom: 240px; }
+.player-frame { flex: none; width: 320px; height: 180px; border-radius: 12px; overflow: hidden; background: #000; }
+.player-frame iframe { width: 100%; height: 100%; display: block; }
+.player-info { flex: 1; min-width: 0; }
+.player-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player-sub { font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player-keys { font-size: .72rem; margin-top: 6px; }
+.player-controls { display: flex; gap: 6px; flex: none; }
+.player-controls .active { color: var(--accent); border-color: var(--accent); }
+@media (max-width: 720px) {
+    .player-frame { width: 168px; height: 94px; }
+    .player-keys { display: none; }
+    body.player-open .content { padding-bottom: 150px; }
+}
+
+/* ---- My Music: edit dialog ---- */
+.music-dialog { border: 0; border-radius: var(--r-card); padding: 0; width: min(480px, 92vw); background: var(--panel); color: var(--text); box-shadow: 0 30px 70px rgba(20, 18, 30, .35); }
+.music-dialog::backdrop { background: rgba(15, 12, 25, .45); backdrop-filter: blur(3px); }
+.music-dialog .field-label, .field-label { display: block; font-size: .8rem; font-weight: 700; color: var(--text-2); margin-bottom: 10px; }
+.field-label .input { margin-top: 4px; width: 100%; }
+
+/* ---- My Music: playlists page ---- */
+.playlist-list { display: flex; flex-direction: column; gap: 14px; }
+.playlist-card .pl-status { margin-right: 6px; }
+
+/* ---- My Music: sidebar layout (islands) ---- */
+.music-layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 18px; align-items: start; }
+.music-side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 16px; }
+.island-title { font-size: .7rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text-3); font-weight: 800; margin-bottom: 10px; }
+.island-stack { display: flex; flex-direction: column; gap: 8px; }
+.island-stack .btn, .island .input, .island .select { width: 100%; box-sizing: border-box; }
+.island .ms-btn { width: 100%; }
+.island .ms-panel { width: 100%; min-width: 240px; }
+.island-line { margin-bottom: 6px; font-size: .88rem; }
+.stat-inline { font-size: 1.5rem; font-weight: 300; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-right: 6px; }
+.island .enrich-bar { margin: 8px 0 4px; }
+@media (max-width: 960px) {
+    .music-layout { grid-template-columns: 1fr; }
+    .music-side { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: start; }
+}
+
+/* ---- My Music: covers + undo toast ---- */
+.cell-thumb { width: 44px; padding-top: 4px !important; padding-bottom: 4px !important; }
+.cell-thumb img { width: 38px; height: 38px; object-fit: cover; border-radius: 9px; display: block; background: var(--panel-2); }
+.undo-bar { display: flex; align-items: center; gap: 12px; justify-content: space-between; padding: 10px 14px; margin-bottom: 12px; border-radius: var(--r-el); background: var(--accent-soft); border: 1px solid var(--accent); font-size: .88rem; }
+
+/* ---- My Music: table density (keep actions on screen) ---- */
+.music-table td { white-space: nowrap; }
+.cell-clamp { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.cell-artist { max-width: 150px; }
+.cell-album { max-width: 150px; }
+.col-genres .badge { margin-right: 3px; }
+.music-table .cell-actions, .music-table th:last-child {
+    position: sticky; right: 0; background: var(--panel);
+}
+@media (max-width: 1500px) { .music-table .col-channel { display: none; } }
+@media (max-width: 1150px) { .music-table .col-genres { display: none; } }
+
+/* ---- My Music: table fit refinements ---- */
+.cell-clamp { max-width: 230px; }
+.cell-artist { max-width: 140px; }
+.cell-album { max-width: 130px; }
+.music-table .cell-actions, .music-table th:last-child {
+    background: var(--page);
+    box-shadow: -8px 0 12px -10px rgba(20, 18, 30, .25);
+}
+.music-table tbody tr:hover .cell-actions { background: var(--page); }
+@media (max-width: 1400px) { .music-table .col-genres { display: none; } }
+.cell-clamp { max-width: 240px; }
+.cell-album { max-width: 105px; }
+.cell-artist { max-width: 135px; }
+.music-table th, .music-table td { padding: 8px 10px; }
+.cell-album { max-width: 95px; }
+
+/* ---- My Music: hide columns by CONTAINER width (not viewport) ---- */
+.music-main { container-type: inline-size; }
+.music-table .col-genres, .music-table .col-channel { display: table-cell; }
+@container (max-width: 1250px) { .music-table .col-channel { display: none; } }
+@container (max-width: 1050px) { .music-table .col-genres { display: none; } }
+.cell-clamp { max-width: 215px; }
+.music-table .cell-title { max-width: 215px; }
+.music-table .cell-artist { max-width: 135px; }
+.music-table .cell-album { max-width: 100px; }
+
+/* ---- My Music: scroll behavior (sticky offsets, sidebar scroll, sticky thead) ---- */
+/* Sidebar clears the 64px sticky topbar, scrolls internally when taller than
+   the viewport, and shrinks when the docked player claims the bottom edge. */
+.music-side {
+    top: 80px;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    padding: 2px 2px 16px;
+    scrollbar-width: thin;
+}
+body.player-open .music-side { max-height: calc(100vh - 96px - 216px); }
+
+/* Sticky table header: the wrapper must not be a scroll container for page
+   sticky to work — column collapsing keeps the table within its box anyway. */
+.music-main .table-wrap { overflow: visible; }
+.music-table thead th {
+    position: sticky;
+    top: 64px;
+    z-index: 5;
+    background: var(--page);
+}
+.music-table thead th:last-child { z-index: 6; }
+.music-table .cell-actions { z-index: 1; }
+@media (max-width: 700px) {
+    /* tiny screens: give back horizontal scroll, losing the sticky header */
+    .music-main .table-wrap { overflow-x: auto; }
+    .music-table thead th { position: static; }
+}
+.music-side { scrollbar-color: var(--panel-border) transparent; }
+.music-side::-webkit-scrollbar { width: 6px; }
+.music-side::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 99px; }
+.music-side::-webkit-scrollbar-track { background: transparent; }
+
+/* ---- My Music: static sidebar (no internal scroll) + player artwork ---- */
+.music-side { position: static; max-height: none; overflow: visible; }
+body.player-open .music-side { max-height: none; }
+.player-frame { position: relative; }
+.player-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; }
+
+/* ---- My Music: keep the card's rounded corners (opaque thead + pinned
+   actions column would otherwise paint square over them) ---- */
+.music-table thead th:first-child { border-top-left-radius: var(--r-card); }
+.music-table thead th:last-child { border-top-right-radius: var(--r-card); }
+.music-table tbody tr:last-child td { border-bottom: 0; }
+.music-table tbody tr:last-child td:first-child { border-bottom-left-radius: var(--r-card); }
+.music-table tbody tr:last-child td:last-child { border-bottom-right-radius: var(--r-card); }
