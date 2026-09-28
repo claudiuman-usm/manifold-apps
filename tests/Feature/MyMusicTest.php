@@ -102,6 +102,31 @@ class MyMusicTest extends TestCase
         $this->actingAs($this->user)->postJson(route('music.sync'))->assertJson(['inserted' => 0, 'total' => 1]);
     }
 
+    public function test_daily_sync_command_fetches_liked_videos(): void
+    {
+        $this->connect();
+        Http::fake([
+            'https://www.googleapis.com/youtube/v3/playlistItems*' => Http::response([
+                'items' => [[
+                    'snippet' => ['title' => 'A - B', 'videoOwnerChannelTitle' => 'A', 'position' => 0],
+                    'contentDetails' => ['videoId' => 'cronvideo01'],
+                ]],
+            ]),
+        ]);
+
+        $this->artisan('music:sync')
+            ->expectsOutputToContain('1 new')
+            ->assertExitCode(0);
+
+        $this->assertDatabaseHas('music_videos', ['video_id' => 'cronvideo01']);
+    }
+
+    public function test_sync_command_is_a_noop_when_not_connected(): void
+    {
+        $this->artisan('music:sync')->assertExitCode(0);
+        $this->assertSame(0, Video::count());
+    }
+
     public function test_sync_surfaces_quota_exceeded(): void
     {
         $this->connect();

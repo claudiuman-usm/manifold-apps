@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.6.0] - 2026-09-28
+
+### Added
+- My Music: **daily auto-sync** — new `music:sync` artisan command fetches fresh Liked videos unattended (run from a daily cron); the existing every-minute enrichment cron then identifies whatever arrives, making the whole pipeline hands-off. Sync logic extracted into a shared `LikedSyncer` used by both the browser sync and the command.
+
 ## [1.5.2] - 2026-09-28
 
 ### Added

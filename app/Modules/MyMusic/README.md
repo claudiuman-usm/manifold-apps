@@ -42,7 +42,14 @@ Keyless but rate-limited to 1 request/second with a descriptive User-Agent
 * * * * * /opt/alt/php84/usr/bin/php /home/manifold/repositories/manifold-apps/artisan music:enrich >/dev/null 2>&1
 ```
 
-Locally: `php artisan music:enrich --all` churns the whole backlog.
+A second, daily cron pulls new Liked videos automatically (`music:sync`);
+whatever it finds is parsed + enriched by the every-minute cron above:
+
+```
+0 4 * * * /opt/alt/php84/usr/bin/php /home/manifold/repositories/manifold-apps/artisan music:sync >/dev/null 2>&1
+```
+
+Locally: `php artisan music:sync` then `php artisan music:enrich --all`.
 Manual fixes (✎ in the table) set `enrich_status=manual` and are never overwritten.
 
 ## YouTube quota
