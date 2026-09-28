@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.6.1] - 2026-09-28
+
+### Added
+- My Music: a **scrub bar** in the docked player — current/total time and a draggable seek slider on both the library and playlists players. Driven by the YouTube player's own `infoDelivery` messages (robust across API versions) and seeks via the iframe postMessage command API.
+
 ## [1.6.0] - 2026-09-28
 
 ### Added

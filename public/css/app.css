@@ -893,3 +893,19 @@ body.player-open .music-side { max-height: none; }
 .music-table tbody tr:last-child td { border-bottom: 0; }
 .music-table tbody tr:last-child td:first-child { border-bottom-left-radius: var(--r-card); }
 .music-table tbody tr:last-child td:last-child { border-bottom-right-radius: var(--r-card); }
+
+/* ---- My Music: scrub bar ---- */
+.player-scrub { display: flex; align-items: center; gap: 10px; margin-top: 8px; max-width: 560px; }
+.player-scrub .num { font-size: .74rem; font-variant-numeric: tabular-nums; color: var(--text-3); min-width: 34px; }
+.player-scrub .num:first-child { text-align: right; }
+.seek {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 5px; border-radius: 99px;
+    background: var(--panel-2); outline: none; cursor: pointer;
+}
+.seek::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 13px; height: 13px; border-radius: 50%;
+    background: var(--accent); border: 0;
+}
+.seek::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--accent); border: 0; }

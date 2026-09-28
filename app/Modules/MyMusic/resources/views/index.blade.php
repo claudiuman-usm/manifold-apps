@@ -149,6 +149,11 @@
             <div class="player-info">
                 <div class="player-title" id="player-title"></div>
                 <div class="player-sub muted" id="player-sub"></div>
+                <div class="player-scrub">
+                    <span class="num" id="time-now">0:00</span>
+                    <input type="range" id="seek" class="seek" min="0" max="0" step="1" value="0" aria-label="Seek">
+                    <span class="num muted" id="time-total">0:00</span>
+                </div>
                 <div class="player-keys muted">{{ __('music::messages.player.keys') }}</div>
             </div>
             <div class="player-controls">
@@ -492,6 +497,10 @@
         art.classList.remove('hidden');
         $('player-title').textContent = row ? row.ti : '';
         $('player-sub').textContent = row ? [row.a, row.al, row.y].filter(Boolean).join(' · ') : '';
+        seek.value = 0;
+        seek.max = 0;
+        $('time-now').textContent = $('time-total').textContent = '0:00';
+        updateSeekFill();
         if (playerState.ready) yt.loadVideoById(videoId);
         else { playerState.wanted = videoId; loadYtApi(); }
         render(); // refresh row highlight
@@ -540,6 +549,47 @@
         $('player-bar').classList.add('hidden');
         document.body.classList.remove('player-open');
         render();
+    });
+
+    /* ---------- Scrub bar ---------- */
+    const seek = $('seek');
+    let seeking = false;
+    const fmtTime = (s) => {
+        s = Math.max(0, Math.floor(s || 0));
+        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    };
+    function updateSeekFill() {
+        const p = +seek.max > 0 ? (+seek.value / +seek.max) * 100 : 0;
+        seek.style.background = `linear-gradient(90deg, var(--accent) ${p}%, var(--panel-2) ${p}%)`;
+    }
+    seek.addEventListener('input', () => {
+        seeking = true;
+        $('time-now').textContent = fmtTime(+seek.value);
+        updateSeekFill();
+    });
+    seek.addEventListener('change', () => {
+        // Command the iframe directly (getDuration/getCurrentTime polling is
+        // unreliable across YT API versions; the postMessage command API is not).
+        const f = document.querySelector('#yt-frame-holder iframe');
+        if (f) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekTo', args: [+seek.value, true] }), '*');
+        seeking = false;
+    });
+    // Drive the bar from the player's own infoDelivery messages (they carry
+    // currentTime + duration and fire ~every 250ms while playing).
+    window.addEventListener('message', (e) => {
+        if (typeof e.data !== 'string' || e.data[0] !== '{' || !e.data.includes('infoDelivery')) return;
+        let info;
+        try { info = JSON.parse(e.data).info; } catch { return; }
+        if (!info || seeking) return;
+        if (info.duration > 0 && +seek.max !== Math.floor(info.duration)) {
+            seek.max = Math.floor(info.duration);
+            $('time-total').textContent = fmtTime(info.duration);
+        }
+        if (typeof info.currentTime === 'number') {
+            seek.value = Math.floor(info.currentTime);
+            $('time-now').textContent = fmtTime(info.currentTime);
+            updateSeekFill();
+        }
     });
 
     document.addEventListener('keydown', (e) => {

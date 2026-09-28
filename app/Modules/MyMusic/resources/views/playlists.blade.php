@@ -65,6 +65,11 @@
         <div class="player-info">
             <div class="player-title" id="player-title"></div>
             <div class="player-sub muted" id="player-sub"></div>
+            <div class="player-scrub">
+                <span class="num" id="time-now">0:00</span>
+                <input type="range" id="seek" class="seek" min="0" max="0" step="1" value="0" aria-label="Seek">
+                <span class="num muted" id="time-total">0:00</span>
+            </div>
         </div>
         <div class="player-controls">
             <button type="button" class="btn btn-ghost btn-sm" id="pl-prev" title="{{ __('music::messages.player.prev') }}">⏮</button>
@@ -207,6 +212,43 @@
             },
         });
     }
+
+    /* ---------- Scrub bar ---------- */
+    const seek = document.getElementById('seek');
+    let seeking = false;
+    const fmtTime = (s) => {
+        s = Math.max(0, Math.floor(s || 0));
+        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    };
+    const updateSeekFill = () => {
+        const p = +seek.max > 0 ? (+seek.value / +seek.max) * 100 : 0;
+        seek.style.background = `linear-gradient(90deg, var(--accent) ${p}%, var(--panel-2) ${p}%)`;
+    };
+    seek.addEventListener('input', () => {
+        seeking = true;
+        document.getElementById('time-now').textContent = fmtTime(+seek.value);
+        updateSeekFill();
+    });
+    seek.addEventListener('change', () => {
+        const f = document.querySelector('.player-frame iframe');
+        if (f) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekTo', args: [+seek.value, true] }), '*');
+        seeking = false;
+    });
+    window.addEventListener('message', (e) => {
+        if (typeof e.data !== 'string' || e.data[0] !== '{' || !e.data.includes('infoDelivery')) return;
+        let info;
+        try { info = JSON.parse(e.data).info; } catch { return; }
+        if (!info || seeking) return;
+        if (info.duration > 0 && +seek.max !== Math.floor(info.duration)) {
+            seek.max = Math.floor(info.duration);
+            document.getElementById('time-total').textContent = fmtTime(info.duration);
+        }
+        if (typeof info.currentTime === 'number') {
+            seek.value = Math.floor(info.currentTime);
+            document.getElementById('time-now').textContent = fmtTime(info.currentTime);
+            updateSeekFill();
+        }
+    });
 
     document.getElementById('pl-prev').addEventListener('click', () => ready && yt.previousVideo());
     document.getElementById('pl-next').addEventListener('click', () => ready && yt.nextVideo());
