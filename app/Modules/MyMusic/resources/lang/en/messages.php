@@ -89,6 +89,7 @@ return [
         'open' => 'Open in YouTube Music',
         'edit' => 'Edit',
         'toggle' => 'Mark as music / non-music (non-music is hidden from the Music view)',
+        'restore' => 'Move back to Music',
     ],
 
     'edit' => [

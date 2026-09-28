@@ -89,6 +89,7 @@ return [
         'open' => 'Deschide în YouTube Music',
         'edit' => 'Editează',
         'toggle' => 'Marchează muzică / non-muzică (non-muzica e ascunsă din lista Muzică)',
+        'restore' => 'Mută înapoi la Muzică',
     ],
 
     'edit' => [

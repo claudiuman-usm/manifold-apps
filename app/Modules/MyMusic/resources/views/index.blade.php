@@ -228,6 +228,7 @@
         'play' => __('music::messages.actions.play'),
         'open' => __('music::messages.actions.open'),
         'edit' => __('music::messages.actions.edit'),
+        'restore' => __('music::messages.actions.restore'),
         'toggle' => __('music::messages.actions.toggle'),
         'status' => __('music::messages.status_labels'),
         'pl_tracks' => __('music::messages.playlists.tracks'),
@@ -322,6 +323,7 @@
                 <button type="button" class="rowbtn" data-act="play" title="${T.play}">▶</button>
                 <a class="rowbtn" href="https://music.youtube.com/watch?v=${esc(r.v)}" target="_blank" rel="noopener" title="${T.open}">↗</a>
                 <button type="button" class="rowbtn" data-act="edit" title="${T.edit}">✎</button>
+                ${state.mus === 'non' ? `<button type="button" class="rowbtn" data-act="restore" title="${T.restore}">♪</button>` : ''}
             </td>
         </tr>`;
     }
@@ -562,6 +564,14 @@
 
         if (btn.dataset.act === 'play') play(row.v);
         else if (btn.dataset.act === 'edit') openEdit(row);
+        else if (btn.dataset.act === 'restore') {
+            // Only offered in the Non-music view: move the track back to Music.
+            api(`${URLS.videos}/${row.vid}/toggle-music`, 'POST').then((d) => {
+                row.m = d.is_music;
+                if (row.m && row.s === 'skipped') row.s = 'pending';
+                render();
+            }).catch(() => {});
+        }
     });
 
     /* ---------- Edit dialog ---------- */

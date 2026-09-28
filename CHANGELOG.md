@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.5.2] - 2026-09-28
+
+### Added
+- My Music: a ♪ "Move back to Music" action on each row — shown only in the **Non-music** view, so wrongly auto-flagged tracks can be restored without any risk of accidentally hiding music from the normal view.
+
 ## [1.5.1] - 2026-09-28
 
 ### Fixed
