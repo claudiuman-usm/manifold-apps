@@ -380,7 +380,7 @@
             (r.gf || []).forEach((g) => genres.set(g, (genres.get(g) || 0) + 1));
         });
         return {
-            artists: [...artists.entries()].sort((a, b) => a[0].localeCompare(b[0])),
+            artists: [...artists.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])),
             genres: [...genres.entries()].sort((a, b) => b[1] - a[1]),
         };
     }

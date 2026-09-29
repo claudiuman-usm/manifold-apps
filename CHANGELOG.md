@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.8.5] - 2026-09-29
+
+### Changed
+- My Music: the Artist filter dropdown is now ordered by number of tracks (descending, ties alphabetical) — same as the Genre dropdown — instead of alphabetically.
+
 ## [1.8.4] - 2026-09-29
 
 ### Changed
