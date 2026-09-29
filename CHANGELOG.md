@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.8.4] - 2026-09-29
+
+### Changed
+- The top header no longer sticks to the viewport — it scrolls away with the page (hub-wide). The My Music pinned sidebar group now pins 16px from the top again, since it no longer needs to clear the header.
+
 ## [1.8.3] - 2026-09-29
 
 ### Fixed
