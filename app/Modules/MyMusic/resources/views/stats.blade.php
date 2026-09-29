@@ -10,10 +10,13 @@
 @endphp
 
 @section('content')
+    {{-- Everything inside #music-page is swapped by music-player.js on
+         data-pjax navigation; the docked player below it survives. --}}
+    <div id="music-page">
     <div class="crumbs">
         <a href="{{ route('dashboard') }}">{{ __('hub.nav.dashboard') }}</a>
         <span class="sep">/</span>
-        <a href="{{ route('music.index') }}">{{ __('music::messages.title') }}</a>
+        <a href="{{ route('music.index') }}" data-pjax>{{ __('music::messages.title') }}</a>
         <span class="sep">/</span>
         <span>{{ __('music::messages.stats.heading') }}</span>
     </div>
@@ -23,7 +26,7 @@
             <h1>{{ __('music::messages.stats.heading') }}</h1>
             <p>{{ __('music::messages.stats.subheading') }}</p>
         </div>
-        <a href="{{ route('music.index') }}" class="btn btn-ghost">{{ __('music::messages.stats.back') }}</a>
+        <a href="{{ route('music.index') }}" data-pjax class="btn btn-ghost">{{ __('music::messages.stats.back') }}</a>
     </div>
 
     {{-- Totals --}}
@@ -125,13 +128,22 @@
             @include('music::partials.track-list', ['rows' => $topRated, 'metric' => 'rating'])
         </div>
     </div>
+    </div> {{-- /#music-page --}}
+
+    @include('music::partials.player')
 @endsection
 
 @push('scripts')
-@if ($aiConfigured)
-<script>
+<script src="{{ route('assets.music-player') }}?v={{ filemtime(public_path('js/music-player.js')) }}"></script>
+<script data-music-page>
 (() => {
-    const btn = document.getElementById('ai-btn');
+    // Re-executed on every in-module (data-pjax) visit: abort the previous
+    // page script's document-level listeners before binding new ones.
+    window.musicPageAbort?.abort();
+    window.musicPageAbort = new AbortController();
+
+    const btn = document.getElementById('ai-btn'); // absent when no API key is set
+    if (!btn) return;
     const out = document.getElementById('ai-out');
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
     const T = @js(['run' => __('music::messages.stats.ai_run'), 'running' => __('music::messages.stats.ai_running')]);
@@ -158,5 +170,4 @@
     });
 })();
 </script>
-@endif
 @endpush

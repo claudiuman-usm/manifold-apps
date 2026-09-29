@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.8.2] - 2026-09-29
+
+### Added
+- My Music: **back-to-top button** — a round glass button in the bottom-right of all music pages, appearing after ~400px of scroll; smooth-scrolls to the top and lifts above the docked player when it's open.
+
+### Changed
+- My Music: the Library sidebar's first three islands (Actions, Search, Filters) now **stay pinned** while the table scrolls; the connection/status island scrolls away normally. On short viewports the pinned group scrolls internally; in the single-column mobile layout nothing is pinned.
+
+## [1.8.1] - 2026-09-29
+
+### Changed
+- My Music: friendlier star ratings — the text ★ glyphs are replaced with rounded-corner SVG stars (soft outline when unset, filled amber when set, gentle grow on hover) everywhere they appear: the library table, the docked player and the stats lists.
+
+## [1.8.0] - 2026-09-29
+
+### Added
+- My Music: **the docked player survives navigation** between the Library, Playlists and Stats pages. Links between them now swap only the page content in place (`#music-page`), while the player bar — extracted to a shared partial + `public/js/music-player.js` — keeps its YouTube iframe untouched, so the music never stops. Back/Forward work too; leaving the module is a normal full load.
+
+### Changed
+- My Music: the Library and Playlists pages now share one player implementation (`window.MusicPlayer`) instead of two separate ones; the playlists-page player gains the artwork cover, star rating, shuffle toggle and keyboard shortcuts it lacked. The player keeps its own copy of the play queue, so next/prev/auto-advance keep working while you browse Stats or Playlists.
+- My Music: after finishing a playlist creation, the redirect to the playlists page keeps the music playing.
+
+## [1.7.1] - 2026-09-29
+
+### Added
+- My Music: star rating in the docked player — rate (or clear) the current track without hunting for its row; stays in sync with the table.
+
+### Fixed
+- My Music: the highlighted now-playing row is scrolled to the middle of the screen instead of ending up hidden under the docked player.
+
 ## [1.7.0] - 2026-09-28
 
 ### Added

@@ -9,7 +9,11 @@
             @if ($metric === 'plays')
                 {{ $r['plays'] }} {{ __('music::messages.stats.plays') }}
             @elseif ($metric === 'rating')
-                <span class="stars-static">{{ str_repeat('★', (int) $r['rating']).str_repeat('☆', 3 - (int) $r['rating']) }}</span>
+                <span class="stars-static">
+                    @for ($n = 1; $n <= 3; $n++)
+                        <svg class="star-ico{{ $n <= (int) $r['rating'] ? ' filled' : '' }}" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    @endfor
+                </span>
             @else
                 {{ $r['last'] ?: __('music::messages.stats.never') }}
             @endif

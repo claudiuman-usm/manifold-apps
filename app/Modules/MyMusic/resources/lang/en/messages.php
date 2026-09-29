@@ -117,6 +117,7 @@ return [
         'shuffle' => 'Shuffle',
         'close' => 'Close player',
         'keys' => 'space play/pause · ← prev · → next',
+        'to_top' => 'Back to top',
     ],
 
     'playlists' => [

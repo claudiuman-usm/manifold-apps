@@ -27,7 +27,17 @@ class AssetController extends Controller
 
     public function musicFilterJs(): Response
     {
-        $path = public_path('js/music-filter.js');
+        return $this->js('music-filter');
+    }
+
+    public function musicPlayerJs(): Response
+    {
+        return $this->js('music-player');
+    }
+
+    private function js(string $name): Response
+    {
+        $path = public_path("js/{$name}.js");
 
         abort_unless(is_file($path), 404);
 

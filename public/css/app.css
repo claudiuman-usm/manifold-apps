@@ -771,6 +771,8 @@ body.player-open .content { padding-bottom: 240px; }
 .player-info { flex: 1; min-width: 0; }
 .player-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-sub { font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player-stars { margin: 4px 0 2px; }
+.player-stars .star { font-size: 1.2rem; padding: 0 3px 0 0; }
 .player-keys { font-size: .72rem; margin-top: 6px; }
 .player-controls { display: flex; gap: 10px; flex: none; align-items: center; }
 .player-controls .active { color: var(--accent); border-color: var(--accent); }
@@ -804,8 +806,19 @@ body.player-open .content { padding-bottom: 240px; }
 .playlist-card .pl-status { margin-right: 6px; }
 
 /* ---- My Music: sidebar layout (islands) ---- */
-.music-layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 18px; align-items: start; }
-.music-side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 16px; }
+.music-layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 18px; }
+.music-side { display: flex; flex-direction: column; gap: 14px; align-self: stretch; }
+/* Actions + search + filters pin to the viewport while the table scrolls;
+   the status island below them scrolls away normally (glass cards, so it
+   sliding underneath reads fine). */
+/* top offset = sticky topbar (64px) + breathing room. */
+.side-sticky { position: sticky; top: 80px; z-index: 5; display: flex; flex-direction: column; gap: 14px; }
+/* Short viewports: let the pinned group scroll internally instead of hiding
+   its bottom controls. */
+@media (max-height: 880px) {
+    .side-sticky { max-height: calc(100vh - 96px); overflow-y: auto; }
+    body.player-open .side-sticky { max-height: calc(100vh - 308px); }
+}
 .island-title { font-size: .7rem; text-transform: uppercase; letter-spacing: .09em; color: var(--text-3); font-weight: 800; margin-bottom: 10px; }
 .island-stack { display: flex; flex-direction: column; gap: 8px; }
 .island-stack .btn, .island .input, .island .select { width: 100%; box-sizing: border-box; }
@@ -821,7 +834,27 @@ body.player-open .content { padding-bottom: 240px; }
 @media (max-width: 960px) {
     .music-layout { grid-template-columns: 1fr; }
     .music-side { position: static; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: start; }
+    /* Single-column layout: unwrap the sticky group so its islands join the card grid. */
+    .side-sticky { position: static; display: contents; }
 }
+
+/* ---- My Music: back-to-top ---- */
+.to-top {
+    position: fixed; right: 22px; bottom: 22px; z-index: 55;
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 1px solid var(--panel-border); background: var(--panel);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    color: var(--text-2); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 24px rgba(20, 18, 30, .18);
+    opacity: 0; pointer-events: none; transform: translateY(10px);
+    transition: opacity .2s, transform .2s, color .15s, background .15s;
+}
+.to-top.show { opacity: 1; pointer-events: auto; transform: none; }
+.to-top:hover { color: var(--text); background: var(--panel-strong); }
+/* Sit above the docked player when it's open. */
+body.player-open .to-top { bottom: 226px; }
+@media (max-width: 720px) { body.player-open .to-top { bottom: 142px; } }
 
 /* ---- My Music: covers + undo toast ---- */
 .cell-thumb { width: 44px; padding-top: 4px !important; padding-bottom: 4px !important; }
@@ -931,9 +964,12 @@ body.player-open .music-side { max-height: none; }
 
 /* ---- My Music: rating stars + plays column ---- */
 .cell-stars { white-space: nowrap; }
-.star { border: 0; background: none; cursor: pointer; padding: 0 1px; font-size: 1rem; line-height: 1; color: var(--text-3); }
+.star { border: 0; background: none; cursor: pointer; padding: 0 1px; font-size: 1rem; line-height: 1; color: var(--text-3); transition: color .15s, transform .15s; }
 .star.on { color: #f5b53d; }
-.star:hover { color: #f5b53d; }
+.star:hover { color: #f5b53d; transform: scale(1.2); }
+/* Rounded, friendly star glyph (table, docked player and stats lists). */
+.star-ico { display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.star.on .star-ico, .star-ico.filled { fill: currentColor; }
 th.cell-stars { cursor: pointer; }
 .col-plays { min-width: 2.5em; }
 @container (max-width: 900px) { .music-table .col-plays { display: none; } }
@@ -953,5 +989,5 @@ th.cell-stars { cursor: pointer; }
 .track-title { font-weight: 600; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .track-artist { font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .track-metric { flex: none; font-size: .82rem; }
-.stars-static { color: #f5b53d; letter-spacing: 1px; }
+.stars-static { color: #f5b53d; display: inline-flex; align-items: center; gap: 3px; }
 .ai-out { margin-top: 14px; padding: 14px 16px; border-radius: var(--r-el); background: var(--accent-soft); white-space: pre-wrap; line-height: 1.55; font-size: .92rem; }

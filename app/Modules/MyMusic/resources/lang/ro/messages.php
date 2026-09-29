@@ -117,6 +117,7 @@ return [
         'shuffle' => 'Amestecă',
         'close' => 'Închide playerul',
         'keys' => 'spațiu redă/pauză · ← anterior · → următor',
+        'to_top' => 'Înapoi sus',
     ],
 
     'playlists' => [

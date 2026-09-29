@@ -3,10 +3,13 @@
 @section('bodyClass', 'ctx-music')
 
 @section('content')
+    {{-- Everything inside #music-page is swapped by music-player.js on
+         data-pjax navigation; the docked player below it survives. --}}
+    <div id="music-page">
     <div class="crumbs">
         <a href="{{ route('dashboard') }}">{{ __('hub.nav.dashboard') }}</a>
         <span class="sep">/</span>
-        <a href="{{ route('music.index') }}">{{ __('music::messages.title') }}</a>
+        <a href="{{ route('music.index') }}" data-pjax>{{ __('music::messages.title') }}</a>
         <span class="sep">/</span>
         <span>{{ __('music::messages.playlists.heading') }}</span>
     </div>
@@ -16,7 +19,7 @@
             <h1>{{ __('music::messages.playlists.heading') }}</h1>
             <p>{{ __('music::messages.playlists.subheading') }}</p>
         </div>
-        <a href="{{ route('music.index') }}" class="btn btn-ghost">{{ __('music::messages.playlists.back') }}</a>
+        <a href="{{ route('music.index') }}" data-pjax class="btn btn-ghost">{{ __('music::messages.playlists.back') }}</a>
     </div>
 
     @if ($playlists->isEmpty())
@@ -59,32 +62,22 @@
         </div>
     @endif
 
-    {{-- Docked player (playlist mode) --}}
-    <div id="player-bar" class="player-bar hidden">
-        <div class="player-frame"><div id="yt-player"></div></div>
-        <div class="player-info">
-            <div class="player-title" id="player-title"></div>
-            <div class="player-sub muted" id="player-sub"></div>
-            <div class="player-scrub">
-                <span class="num" id="time-now">0:00</span>
-                <input type="range" id="seek" class="seek" min="0" max="0" step="1" value="0" aria-label="Seek">
-                <span class="num muted" id="time-total">0:00</span>
-            </div>
-        </div>
-        <div class="player-controls">
-            <button type="button" class="btn btn-ghost btn-sm" id="pl-prev" title="{{ __('music::messages.player.prev') }}">⏮</button>
-            <button type="button" class="btn btn-primary btn-sm" id="pl-toggle" title="{{ __('music::messages.player.play') }}">⏯</button>
-            <button type="button" class="btn btn-ghost btn-sm" id="pl-next" title="{{ __('music::messages.player.next') }}">⏭</button>
-            <button type="button" class="btn btn-ghost btn-sm" id="pl-close" title="{{ __('music::messages.player.close') }}">✕</button>
-        </div>
-    </div>
+    </div> {{-- /#music-page --}}
+
+    @include('music::partials.player')
 @endsection
 
 @push('scripts')
 <script src="{{ route('assets.music-filter') }}?v={{ filemtime(public_path('js/music-filter.js')) }}"></script>
-<script>
+<script src="{{ route('assets.music-player') }}?v={{ filemtime(public_path('js/music-player.js')) }}"></script>
+<script data-music-page>
 (() => {
     'use strict';
+
+    // Re-executed on every in-module (data-pjax) visit: abort the previous
+    // page script's document-level listeners before binding new ones.
+    window.musicPageAbort?.abort();
+    window.musicPageAbort = new AbortController();
 
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
     const URLS = {
@@ -171,93 +164,11 @@
                 await api(`${URLS.base}/${id}`, 'DELETE');
                 card.remove();
             } else if (btn.dataset.act === 'play') {
-                playPlaylist(card.dataset.yt, card.querySelector('div[style*="font-weight"]')?.textContent || '');
+                window.MusicPlayer.playList(card.dataset.yt, card.querySelector('div[style*="font-weight"]')?.textContent || '');
             }
         });
     });
 
-    /* ---------- Playlist player ---------- */
-    let yt = null, ready = false, playing = false, wanted = null;
-
-    function playPlaylist(listId, name) {
-        if (!listId) return;
-        document.getElementById('player-bar').classList.remove('hidden');
-        document.body.classList.add('player-open');
-        document.getElementById('player-title').textContent = name;
-        if (ready) { yt.loadPlaylist({ list: listId, listType: 'playlist' }); return; }
-        wanted = listId;
-        if (window.YT && window.YT.Player) init();
-        else {
-            window.onYouTubeIframeAPIReady = init;
-            const s = document.createElement('script');
-            s.src = 'https://www.youtube.com/iframe_api';
-            document.head.appendChild(s);
-        }
-    }
-
-    function init() {
-        yt = new YT.Player('yt-player', {
-            width: '320', height: '180',
-            playerVars: { playsinline: 1 },
-            events: {
-                onReady: () => {
-                    ready = true;
-                    if (wanted) { yt.loadPlaylist({ list: wanted, listType: 'playlist' }); wanted = null; }
-                },
-                onStateChange: (e) => {
-                    playing = e.data === YT.PlayerState.PLAYING;
-                    document.getElementById('pl-toggle').textContent = playing ? '⏸' : '▶';
-                },
-                onError: () => { if (ready) yt.nextVideo(); },
-            },
-        });
-    }
-
-    /* ---------- Scrub bar ---------- */
-    const seek = document.getElementById('seek');
-    let seeking = false;
-    const fmtTime = (s) => {
-        s = Math.max(0, Math.floor(s || 0));
-        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-    };
-    const updateSeekFill = () => {
-        const p = +seek.max > 0 ? (+seek.value / +seek.max) * 100 : 0;
-        seek.style.background = `linear-gradient(90deg, var(--accent) ${p}%, var(--panel-2) ${p}%)`;
-    };
-    seek.addEventListener('input', () => {
-        seeking = true;
-        document.getElementById('time-now').textContent = fmtTime(+seek.value);
-        updateSeekFill();
-    });
-    seek.addEventListener('change', () => {
-        const f = document.querySelector('.player-frame iframe');
-        if (f) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekTo', args: [+seek.value, true] }), '*');
-        seeking = false;
-    });
-    window.addEventListener('message', (e) => {
-        if (typeof e.data !== 'string' || e.data[0] !== '{' || !e.data.includes('infoDelivery')) return;
-        let info;
-        try { info = JSON.parse(e.data).info; } catch { return; }
-        if (!info || seeking) return;
-        if (info.duration > 0 && +seek.max !== Math.floor(info.duration)) {
-            seek.max = Math.floor(info.duration);
-            document.getElementById('time-total').textContent = fmtTime(info.duration);
-        }
-        if (typeof info.currentTime === 'number') {
-            seek.value = Math.floor(info.currentTime);
-            document.getElementById('time-now').textContent = fmtTime(info.currentTime);
-            updateSeekFill();
-        }
-    });
-
-    document.getElementById('pl-prev').addEventListener('click', () => ready && yt.previousVideo());
-    document.getElementById('pl-next').addEventListener('click', () => ready && yt.nextVideo());
-    document.getElementById('pl-toggle').addEventListener('click', () => ready && (playing ? yt.pauseVideo() : yt.playVideo()));
-    document.getElementById('pl-close').addEventListener('click', () => {
-        if (ready) yt.stopVideo();
-        document.getElementById('player-bar').classList.add('hidden');
-        document.body.classList.remove('player-open');
-    });
 })();
 </script>
 @endpush

@@ -3,6 +3,9 @@
 @section('bodyClass', 'ctx-music')
 
 @section('content')
+    {{-- Everything inside #music-page is swapped by music-player.js on
+         data-pjax navigation; the docked player below it survives. --}}
+    <div id="music-page">
     <div class="crumbs">
         <a href="{{ route('dashboard') }}">{{ __('hub.nav.dashboard') }}</a>
         <span class="sep">/</span>
@@ -38,14 +41,16 @@
         <div class="music-layout">
             {{-- Sidebar: islands of search, filters, actions, then sync/enrich status --}}
             <aside class="music-side">
+                {{-- Actions + search + filters stay pinned while the table scrolls --}}
+                <div class="side-sticky">
                 <div class="card card-pad island">
                     <div class="island-title">{{ __('music::messages.side.actions') }}</div>
                     <div class="island-stack">
                         <button type="button" id="play-all" class="btn btn-primary">▶ {{ __('music::messages.library.play_all') }}</button>
                         <button type="button" id="shuffle-btn" class="btn btn-ghost">⤨ {{ __('music::messages.library.shuffle') }}</button>
                         <button type="button" id="create-playlist" class="btn btn-ghost">＋ {{ __('music::messages.playlists.create') }}</button>
-                        <a href="{{ route('music.playlists.index') }}" class="btn btn-ghost">{{ __('music::messages.playlists.view_all') }}</a>
-                        <a href="{{ route('music.stats') }}" class="btn btn-ghost">{{ __('music::messages.stats.nav') }}</a>
+                        <a href="{{ route('music.playlists.index') }}" data-pjax class="btn btn-ghost">{{ __('music::messages.playlists.view_all') }}</a>
+                        <a href="{{ route('music.stats') }}" data-pjax class="btn btn-ghost">{{ __('music::messages.stats.nav') }}</a>
                     </div>
                 </div>
 
@@ -86,6 +91,7 @@
                         <button type="button" id="clear-filters" class="btn btn-sm btn-ghost">{{ __('music::messages.library.clear') }}</button>
                     </div>
                 </div>
+                </div> {{-- /.side-sticky --}}
 
                 <div class="card card-pad island">
                     <div class="island-title">{{ __('music::messages.side.status') }}</div>
@@ -151,32 +157,6 @@
             </main>
         </div>
 
-        {{-- Docked player --}}
-        <div id="player-bar" class="player-bar hidden">
-            <div id="yt-frame-holder" class="player-frame">
-                <div id="yt-player"></div>
-                {{-- Artwork covers the video; the iframe keeps playing under it. --}}
-                <img id="player-art" class="player-art hidden" alt="">
-            </div>
-            <div class="player-info">
-                <div class="player-title" id="player-title"></div>
-                <div class="player-sub muted" id="player-sub"></div>
-                <div class="player-scrub">
-                    <span class="num" id="time-now">0:00</span>
-                    <input type="range" id="seek" class="seek" min="0" max="0" step="1" value="0" aria-label="Seek">
-                    <span class="num muted" id="time-total">0:00</span>
-                </div>
-                <div class="player-keys muted">{{ __('music::messages.player.keys') }}</div>
-            </div>
-            <div class="player-controls">
-                <button type="button" class="btn btn-ghost btn-sm" id="pl-prev" title="{{ __('music::messages.player.prev') }}">⏮</button>
-                <button type="button" class="btn btn-primary btn-sm" id="pl-toggle" title="{{ __('music::messages.player.play') }}">⏯</button>
-                <button type="button" class="btn btn-ghost btn-sm" id="pl-next" title="{{ __('music::messages.player.next') }}">⏭</button>
-                <button type="button" class="btn btn-ghost btn-sm" id="pl-shuffle" title="{{ __('music::messages.player.shuffle') }}">⤨</button>
-                <button type="button" class="btn btn-ghost btn-sm" id="pl-close" title="{{ __('music::messages.player.close') }}">✕</button>
-            </div>
-        </div>
-
         {{-- Create-playlist dialog --}}
         <dialog id="playlist-dialog" class="music-dialog">
             <form id="playlist-form" method="dialog" class="card-pad">
@@ -219,14 +199,26 @@
             </form>
         </dialog>
     @endif
+    </div> {{-- /#music-page --}}
+
+    @if ($configured && $token)
+        @include('music::partials.player')
+    @endif
 @endsection
 
 @push('scripts')
 @if ($configured && $token)
 <script src="{{ route('assets.music-filter') }}?v={{ filemtime(public_path('js/music-filter.js')) }}"></script>
-<script>
+<script src="{{ route('assets.music-player') }}?v={{ filemtime(public_path('js/music-player.js')) }}"></script>
+<script data-music-page>
 (() => {
     'use strict';
+
+    // Re-executed on every in-module (data-pjax) visit: abort the previous
+    // page script's document-level listeners before binding new ones.
+    window.musicPageAbort?.abort();
+    const SIG = (window.musicPageAbort = new AbortController()).signal;
+    const MP = window.MusicPlayer;
 
     let DATA = @js($tracks);
     let PROGRESS = @js($enrichProgress);
@@ -301,8 +293,6 @@
         sort: params.get('sort') || 'p',
         dir: params.get('dir') || 'asc',
     };
-    let shuffle = params.get('shuffle') === '1';
-
     function syncUrl() {
         const p = new URLSearchParams();
         if (state.q) p.set('q', state.q);
@@ -314,7 +304,7 @@
         if (state.mus !== 'music') p.set('mus', state.mus);
         if (state.rate) p.set('rate', state.rate);
         if (state.sort !== 'p' || state.dir !== 'asc') { p.set('sort', state.sort); p.set('dir', state.dir); }
-        if (shuffle) p.set('shuffle', '1');
+        if (MP.shuffle) p.set('shuffle', '1');
         history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
     }
 
@@ -329,14 +319,14 @@
         let out = '';
         for (let n = 1; n <= 3; n++) {
             const on = (r.rt || 0) >= n;
-            out += `<button type="button" class="star${on ? ' on' : ''}" data-act="rate" data-n="${n}" title="${n} ★">${on ? '★' : '☆'}</button>`;
+            out += `<button type="button" class="star${on ? ' on' : ''}" data-act="rate" data-n="${n}" title="${n} ★"><svg class="star-ico" viewBox="0 0 24 24" width="1em" height="1em" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`;
         }
         return out;
     }
 
     function rowHtml(r, i) {
         const genres = (r.g || []).slice(0, 2).map((g) => `<span class="badge badge-sm">${esc(g)}</span>`).join(' ');
-        const playingCls = playerState.videoId === r.v ? ' playing' : '';
+        const playingCls = MP.videoId === r.v ? ' playing' : '';
         const noEmbed = r.e ? '' : ` <span class="badge badge-warning badge-sm">${T.no_embed}</span>`;
         return `<tr data-i="${i}" data-v="${esc(r.v)}" class="${r.m ? '' : 'row-nonmusic'}${playingCls}">
             <td class="num-col muted">${r.p == null ? '' : r.p + 1}</td>
@@ -359,7 +349,9 @@
     }
 
     function render() {
+        if (!tbody.isConnected) return; // stale async loop from a swapped-out page
         currentRows = filtered();
+        MP.setQueue(currentRows);
         tbody.innerHTML = currentRows.map(rowHtml).join('');
         $('table-empty').classList.toggle('hidden', currentRows.length > 0);
         $('row-count').textContent = fill(T.count, { shown: currentRows.length, total: DATA.length });
@@ -431,7 +423,7 @@
         });
         document.addEventListener('click', (e) => {
             if (!root.contains(e.target)) panel.classList.add('hidden');
-        });
+        }, { signal: SIG });
         refreshBtn();
         return { refreshBtn };
     }
@@ -472,184 +464,44 @@
         });
     });
 
-    /* ---------- YouTube player ---------- */
-    const playerState = { videoId: null, ready: false, playing: false, wanted: null };
-    let yt = null;
+    /* ---------- Player wiring (the docked player itself lives in music-player.js) ---------- */
+    $('play-all').addEventListener('click', () => MP.playAll());
 
-    function loadYtApi() {
-        if (window.YT && window.YT.Player) { initPlayer(); return; }
-        window.onYouTubeIframeAPIReady = initPlayer;
-        const s = document.createElement('script');
-        s.src = 'https://www.youtube.com/iframe_api';
-        document.head.appendChild(s);
-    }
+    const refreshShuffleBtn = () => {
+        $('shuffle-btn').classList.toggle('btn-primary', MP.shuffle);
+        $('shuffle-btn').classList.toggle('btn-ghost', !MP.shuffle);
+    };
+    $('shuffle-btn').addEventListener('click', () => MP.toggleShuffle());
+    document.addEventListener('music:shuffle', () => { refreshShuffleBtn(); syncUrl(); }, { signal: SIG });
+    if (params.get('shuffle') === '1') MP.setShuffle(true);
+    refreshShuffleBtn();
 
-    function initPlayer() {
-        yt = new YT.Player('yt-player', {
-            width: '320', height: '180',
-            playerVars: { playsinline: 1 },
-            events: {
-                onReady: () => {
-                    playerState.ready = true;
-                    if (playerState.wanted) { yt.loadVideoById(playerState.wanted); playerState.wanted = null; }
-                },
-                onStateChange: (e) => {
-                    playerState.playing = e.data === YT.PlayerState.PLAYING;
-                    $('pl-toggle').textContent = playerState.playing ? '⏸' : '▶';
-                    if (e.data === YT.PlayerState.ENDED) advance(1);
-                },
-                onError: async (e) => {
-                    // 101/150 = embedding disabled (100 = removed) — remember and move on.
-                    if ([100, 101, 150].includes(e.data)) {
-                        const row = DATA.find((r) => r.v === playerState.videoId);
-                        if (row && row.e) {
-                            row.e = false;
-                            api(`${URLS.videos}/${row.vid}/not-embeddable`, 'POST').catch(() => {});
-                        }
-                    }
-                    advance(1);
-                },
-            },
-        });
-    }
-
-    let playCounted = false; // reset per track; a play is counted once it's really listened to
-
-    function play(videoId) {
-        const row = DATA.find((r) => r.v === videoId);
-        playerState.videoId = videoId;
-        playCounted = false;
-        $('player-bar').classList.remove('hidden');
-        document.body.classList.add('player-open');
-        const art = $('player-art');
-        art.onerror = () => art.classList.add('hidden');
-        art.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-        art.classList.remove('hidden');
-        $('player-title').textContent = row ? row.ti : '';
-        $('player-sub').textContent = row ? [row.a, row.al, row.y].filter(Boolean).join(' · ') : '';
-        seek.value = 0;
-        seek.max = 0;
-        $('time-now').textContent = $('time-total').textContent = '0:00';
-        updateSeekFill();
-        if (playerState.ready) yt.loadVideoById(videoId);
-        else { playerState.wanted = videoId; loadYtApi(); }
+    document.addEventListener('music:trackchange', (e) => {
         render(); // refresh row highlight
-        const tr = tbody.querySelector(`tr[data-v="${CSS.escape(videoId)}"]`);
-        if (tr) tr.scrollIntoView({ block: 'nearest' });
-    }
+        if (!e.detail.v) return;
+        const tr = tbody.querySelector(`tr[data-v="${CSS.escape(e.detail.v)}"]`);
+        if (tr) tr.scrollIntoView({ block: 'center' });
+    }, { signal: SIG });
 
-    function advance(step) {
-        const rows = currentRows.filter((r) => r.e);
-        if (!rows.length) return;
-        let idx = rows.findIndex((r) => r.v === playerState.videoId);
-        let next;
-        if (shuffle && rows.length > 1) {
-            do { next = rows[Math.floor(Math.random() * rows.length)]; } while (next.v === playerState.videoId);
-        } else {
-            next = rows[idx < 0 ? 0 : idx + step];
-        }
-        if (next) play(next.v);
-        else if (yt && playerState.ready) yt.stopVideo();
-    }
+    document.addEventListener('music:played', (e) => {
+        const row = DATA.find((r) => r.v === e.detail.v);
+        if (row) row.pc = e.detail.pc;
+        const cell = tbody.querySelector(`tr[data-v="${CSS.escape(e.detail.v)}"] .col-plays`);
+        if (cell) cell.textContent = e.detail.pc || '';
+    }, { signal: SIG });
 
-    $('play-all').addEventListener('click', () => {
-        const rows = currentRows.filter((r) => r.e);
-        if (!rows.length) return;
-        play((shuffle ? rows[Math.floor(Math.random() * rows.length)] : rows[0]).v);
-    });
-    const refreshShuffleBtns = () => {
-        $('shuffle-btn').classList.toggle('btn-primary', shuffle);
-        $('shuffle-btn').classList.toggle('btn-ghost', !shuffle);
-        $('pl-shuffle').classList.toggle('active', shuffle);
-    };
-    const toggleShuffle = () => { shuffle = !shuffle; refreshShuffleBtns(); syncUrl(); };
-    $('shuffle-btn').addEventListener('click', toggleShuffle);
-    $('pl-shuffle').addEventListener('click', toggleShuffle);
-    refreshShuffleBtns();
-
-    $('pl-prev').addEventListener('click', () => advance(-1));
-    $('pl-next').addEventListener('click', () => advance(1));
-    $('pl-toggle').addEventListener('click', () => {
-        if (!playerState.ready) return;
-        playerState.playing ? yt.pauseVideo() : yt.playVideo();
-    });
-    $('pl-close').addEventListener('click', () => {
-        if (yt && playerState.ready) yt.stopVideo();
-        playerState.videoId = null;
-        $('player-bar').classList.add('hidden');
-        document.body.classList.remove('player-open');
-        render();
-    });
-
-    /* ---------- Scrub bar ---------- */
-    const seek = $('seek');
-    let seeking = false;
-    const fmtTime = (s) => {
-        s = Math.max(0, Math.floor(s || 0));
-        return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-    };
-    function updateSeekFill() {
-        const p = +seek.max > 0 ? (+seek.value / +seek.max) * 100 : 0;
-        seek.style.background = `linear-gradient(90deg, var(--accent) ${p}%, var(--panel-2) ${p}%)`;
-    }
-    seek.addEventListener('input', () => {
-        seeking = true;
-        $('time-now').textContent = fmtTime(+seek.value);
-        updateSeekFill();
-    });
-    seek.addEventListener('change', () => {
-        // Command the iframe directly (getDuration/getCurrentTime polling is
-        // unreliable across YT API versions; the postMessage command API is not).
-        const f = document.querySelector('#yt-frame-holder iframe');
-        if (f) f.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekTo', args: [+seek.value, true] }), '*');
-        seeking = false;
-    });
-    // Drive the bar from the player's own infoDelivery messages (they carry
-    // currentTime + duration and fire ~every 250ms while playing).
-    window.addEventListener('message', (e) => {
-        if (typeof e.data !== 'string' || e.data[0] !== '{' || !e.data.includes('infoDelivery')) return;
-        let info;
-        try { info = JSON.parse(e.data).info; } catch { return; }
-        if (!info || seeking) return;
-        if (info.duration > 0 && +seek.max !== Math.floor(info.duration)) {
-            seek.max = Math.floor(info.duration);
-            $('time-total').textContent = fmtTime(info.duration);
-        }
-        if (typeof info.currentTime === 'number') {
-            seek.value = Math.floor(info.currentTime);
-            $('time-now').textContent = fmtTime(info.currentTime);
-            updateSeekFill();
-            maybeCountPlay(info.currentTime, info.duration);
-        }
-    });
-
-    // A "play" counts once the listener passes 30s (or half of a short track) —
-    // so skips and previews don't inflate the numbers. Once per track load.
-    function maybeCountPlay(t, dur) {
-        if (playCounted || playerState.videoId === null) return;
-        const threshold = Math.min(30, (dur || 60) * 0.5);
-        if (t < threshold) return;
-        playCounted = true;
-        const row = DATA.find((r) => r.v === playerState.videoId);
+    document.addEventListener('music:rated', (e) => {
+        const row = DATA.find((r) => r.v === e.detail.v);
         if (!row) return;
-        api(`${URLS.videos}/${row.vid}/played`, 'POST').then((d) => {
-            row.pc = d.play_count;
-            const tr = tbody.querySelector(`tr[data-v="${CSS.escape(row.v)}"] .col-plays`);
-            if (tr) tr.textContent = row.pc || '';
-        }).catch(() => {});
-    }
+        row.rt = e.detail.rt;
+        const cell = tbody.querySelector(`tr[data-v="${CSS.escape(row.v)}"] .cell-stars`);
+        if (cell) cell.innerHTML = starsHtml(row);
+    }, { signal: SIG });
 
-    document.addEventListener('keydown', (e) => {
-        const el = document.activeElement;
-        const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName || '');
-        if (typing || playerState.videoId === null) return;
-        // A clicked button keeps focus; without this, space would both
-        // play/pause AND re-activate that button.
-        if (el?.tagName === 'BUTTON') el.blur();
-        if (e.code === 'Space') { e.preventDefault(); $('pl-toggle').click(); }
-        else if (e.code === 'ArrowRight') { e.preventDefault(); advance(1); }
-        else if (e.code === 'ArrowLeft') { e.preventDefault(); advance(-1); }
-    });
+    document.addEventListener('music:noembed', (e) => {
+        const row = DATA.find((r) => r.v === e.detail.v);
+        if (row) row.e = false;
+    }, { signal: SIG });
 
     /* ---------- Row actions ---------- */
     tbody.addEventListener('click', (e) => {
@@ -659,18 +511,9 @@
         const row = currentRows[+tr.dataset.i];
         if (!row) return;
 
-        if (btn.dataset.act === 'play') play(row.v);
+        if (btn.dataset.act === 'play') MP.play(row.v);
         else if (btn.dataset.act === 'edit') openEdit(row);
-        else if (btn.dataset.act === 'rate') {
-            // Click the same star that's already the max → clear the rating.
-            const n = +btn.dataset.n;
-            const next = row.rt === n ? 0 : n;
-            api(`${URLS.videos}/${row.vid}/rate`, 'POST', { rating: next }).then((d) => {
-                row.rt = d.rating || 0;
-                const cell = tr.querySelector('.cell-stars');
-                if (cell) cell.innerHTML = starsHtml(row);
-            }).catch(() => {});
-        }
+        else if (btn.dataset.act === 'rate') MP.rate(row, +btn.dataset.n).catch(() => {});
         else if (btn.dataset.act === 'restore') {
             // Only offered in the Non-music view: move the track back to Music.
             api(`${URLS.videos}/${row.vid}/toggle-music`, 'POST').then((d) => {
@@ -834,7 +677,7 @@
             $('p-status').textContent = fill(T.pl_creating, { inserted: playlist.inserted, total });
             if (playlist.queued === 0) {
                 $('p-status').textContent = T.pl_done;
-                setTimeout(() => { location.href = URLS.playlistsPage; }, 800);
+                setTimeout(() => MP.visit(URLS.playlistsPage), 800);
                 return;
             }
         }
@@ -850,24 +693,11 @@
         render();
     }
 
-    /* ---------- Theme switch without a reload (keeps playback alive) ---------- */
-    const themeLink = document.querySelector('.topbar a[href*="/theme/"]');
-    if (themeLink) {
-        // Icon shows the ACTION: in dark mode a sun (go light), in light a moon.
-        const SUN = '<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1.8" x2="12" y2="4.2"/><line x1="12" y1="19.8" x2="12" y2="22.2"/><line x1="1.8" y1="12" x2="4.2" y2="12"/><line x1="19.8" y1="12" x2="22.2" y2="12"/><line x1="4.5" y1="4.5" x2="6.2" y2="6.2"/><line x1="17.8" y1="17.8" x2="19.5" y2="19.5"/><line x1="4.5" y1="19.5" x2="6.2" y2="17.8"/><line x1="17.8" y1="6.2" x2="19.5" y2="4.5"/></g></svg>';
-        const MOON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>';
-        themeLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            fetch(themeLink.href).catch(() => {}); // persist in the session
-            const html = document.documentElement;
-            const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
-            html.dataset.theme = next;
-            themeLink.href = themeLink.href.replace(/theme\/\w+$/, 'theme/' + (next === 'dark' ? 'light' : 'dark'));
-            themeLink.innerHTML = next === 'dark' ? SUN : MOON;
-        });
-    }
-
     render();
+    if (MP.videoId) {
+        const tr = tbody.querySelector(`tr[data-v="${CSS.escape(MP.videoId)}"]`);
+        if (tr) tr.scrollIntoView({ block: 'center' });
+    }
 })();
 </script>
 @endif

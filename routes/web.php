@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 // copy into the shim's served folder). Public — the login page needs it.
 Route::get('assets/app.css', [AssetController::class, 'css'])->name('assets.css');
 Route::get('assets/music-filter.js', [AssetController::class, 'musicFilterJs'])->name('assets.music-filter');
+Route::get('assets/music-player.js', [AssetController::class, 'musicPlayerJs'])->name('assets.music-player');
 
 // Home-screen / touch icons + web manifest (public — needed on the login page).
 Route::get('assets/icon/{size}.png', [IconController::class, 'icon'])->name('assets.icon')->whereNumber('size');

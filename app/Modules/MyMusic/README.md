@@ -61,6 +61,20 @@ Every call is logged to `music_quota_log`; playlist creation shows the estimate
 first, pauses automatically on `quotaExceeded`, and resumes from where it left
 off (Resume button on `/music/playlists`).
 
+## Docked player
+
+The player bar (`music::partials.player`, driven by `public/js/music-player.js`)
+is shared by all three music pages and **survives navigation between them**:
+links marked `data-pjax` swap only the `#music-page` container in place, so the
+YouTube iframe is never reloaded and playback continues. The player owns the
+queue (a copy of the rows playback started from), transport + keyboard
+shortcuts, shuffle, the scrub bar, star rating of the current track, and play
+counting; page scripts talk to it via `window.MusicPlayer` and `music:*`
+document events. Page scripts re-run on every swap, so each starts by aborting
+the previous page's document-level listeners (`window.musicPageAbort`).
+Leaving the module (e.g. to the dashboard) is a normal full navigation and
+stops playback.
+
 ## Play tracking, ratings & stats
 
 Playing a track past ~30s (or half of a short one) records a **play** — the
