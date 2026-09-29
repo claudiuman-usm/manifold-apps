@@ -234,7 +234,6 @@
         'no_embed' => __('music::messages.library.no_embed'),
         'non_music_marked' => __('music::messages.library.non_music_marked'),
         'search_list' => __('music::messages.library.search_list'),
-        'play' => __('music::messages.actions.play'),
         'open' => __('music::messages.actions.open'),
         'edit' => __('music::messages.actions.edit'),
         'restore' => __('music::messages.actions.restore'),
@@ -340,7 +339,6 @@
             <td class="num-col col-plays muted">${r.pc || ''}</td>
             <td class="muted cell-channel col-channel">${esc(r.c || '')}</td>
             <td class="cell-actions">
-                <button type="button" class="rowbtn" data-act="play" title="${T.play}">▶</button>
                 <a class="rowbtn" href="https://music.youtube.com/watch?v=${esc(r.v)}" target="_blank" rel="noopener" title="${T.open}">↗</a>
                 <button type="button" class="rowbtn" data-act="edit" title="${T.edit}">✎</button>
                 ${state.mus === 'non' ? `<button type="button" class="rowbtn" data-act="restore" title="${T.restore}">♪</button>` : ''}
@@ -503,16 +501,19 @@
         if (row) row.e = false;
     }, { signal: SIG });
 
-    /* ---------- Row actions ---------- */
+    /* ---------- Row actions (click anywhere on a row to play it) ---------- */
     tbody.addEventListener('click', (e) => {
-        const btn = e.target.closest('[data-act]');
-        if (!btn) return;
-        const tr = btn.closest('tr');
-        const row = currentRows[+tr.dataset.i];
+        const tr = e.target.closest('tr');
+        const row = tr && currentRows[+tr.dataset.i];
         if (!row) return;
 
-        if (btn.dataset.act === 'play') MP.play(row.v);
-        else if (btn.dataset.act === 'edit') openEdit(row);
+        const btn = e.target.closest('[data-act]');
+        if (!btn) {
+            // Plain row click plays; links/buttons keep their own behavior.
+            if (!e.target.closest('a, button')) MP.play(row.v);
+            return;
+        }
+        if (btn.dataset.act === 'edit') openEdit(row);
         else if (btn.dataset.act === 'rate') MP.rate(row, +btn.dataset.n).catch(() => {});
         else if (btn.dataset.act === 'restore') {
             // Only offered in the Non-music view: move the track back to Music.

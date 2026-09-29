@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.8.6] - 2026-09-29
+
+### Changed
+- My Music: the ▶ row button is gone — **click anywhere on a row to play it** (the pointer cursor hints at it); the open/edit/stars controls keep their own behavior.
+
+### Fixed
+- My Music: the sticky table header still offset itself 64px to clear the old sticky topbar, leaving it floating over the rows — it now pins to the top edge.
+
 ## [1.8.5] - 2026-09-29
 
 ### Changed

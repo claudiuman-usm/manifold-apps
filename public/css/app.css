@@ -743,6 +743,7 @@ body.ctx-music {
 .music-table th.sorted { color: var(--accent); }
 .music-table th.sorted[data-dir="asc"]::after { content: " ↑"; }
 .music-table th.sorted[data-dir="desc"]::after { content: " ↓"; }
+.music-table tbody tr { cursor: pointer; } /* click anywhere on a row to play it */
 .music-table tbody tr:hover { background: var(--accent-soft); }
 .music-table tr.playing { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
 .music-table tr.row-nonmusic { opacity: .55; }
@@ -912,7 +913,7 @@ body.player-open .music-side { max-height: calc(100vh - 96px - 216px); }
 .music-main .table-wrap { overflow: visible; }
 .music-table thead th {
     position: sticky;
-    top: 64px;
+    top: 0; /* the topbar is no longer sticky, so nothing to clear */
     z-index: 5;
     background: var(--page);
 }
