@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.8.3] - 2026-09-29
+
+### Fixed
+- My Music: the back-to-top button could sit behind the open docked player — its offset was a hard-coded guess of the bar's height. The player script now measures the bar's real rendered height (ResizeObserver + resize) and places the button just above it.
+
 ## [1.8.2] - 2026-09-29
 
 ### Added

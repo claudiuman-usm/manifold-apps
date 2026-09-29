@@ -323,7 +323,16 @@ window.MusicPlayer = window.MusicPlayer || (() => {
     if (toTop) {
         toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         const refreshToTop = () => toTop.classList.toggle('show', window.scrollY > 400);
+        // Keep the button just above the docked player, whatever the bar's
+        // real rendered height is (fonts, zoom, breakpoints).
+        const placeToTop = () => {
+            const h = bar.classList.contains('hidden') ? 0 : bar.offsetHeight;
+            toTop.style.bottom = (h ? h + 18 : 22) + 'px';
+        };
+        new ResizeObserver(placeToTop).observe(bar);
         window.addEventListener('scroll', refreshToTop, { passive: true });
+        window.addEventListener('resize', placeToTop);
+        placeToTop();
         refreshToTop();
     }
 

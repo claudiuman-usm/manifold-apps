@@ -848,13 +848,12 @@ body.player-open .content { padding-bottom: 240px; }
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 10px 24px rgba(20, 18, 30, .18);
     opacity: 0; pointer-events: none; transform: translateY(10px);
-    transition: opacity .2s, transform .2s, color .15s, background .15s;
+    transition: opacity .2s, transform .2s, color .15s, background .15s, bottom .2s;
 }
 .to-top.show { opacity: 1; pointer-events: auto; transform: none; }
 .to-top:hover { color: var(--text); background: var(--panel-strong); }
-/* Sit above the docked player when it's open. */
-body.player-open .to-top { bottom: 226px; }
-@media (max-width: 720px) { body.player-open .to-top { bottom: 142px; } }
+/* When the docked player is open, music-player.js measures the bar and sets
+   an inline bottom offset so the button always sits just above it. */
 
 /* ---- My Music: covers + undo toast ---- */
 .cell-thumb { width: 44px; padding-top: 4px !important; padding-bottom: 4px !important; }
