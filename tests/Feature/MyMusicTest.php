@@ -121,6 +121,57 @@ class MyMusicTest extends TestCase
         $this->assertDatabaseHas('music_videos', ['video_id' => 'cronvideo01']);
     }
 
+    public function test_full_sync_sweeps_unliked_videos_and_relike_flips_back(): void
+    {
+        $this->connect();
+
+        Video::create(['video_id' => 'gonevideo01', 'raw_title' => 'C - D', 'fetched_at' => now()]);
+        Video::create([ // parser-marked non-music, still liked — must never flip back
+            'video_id' => 'nonmusic001', 'raw_title' => 'Some Podcast', 'is_music' => false, 'fetched_at' => now(),
+        ]);
+        Track::create(['video_id' => 'gonevideo01', 'artist' => 'C', 'title' => 'D', 'enrich_status' => 'pending']);
+
+        $playlist = fn (array $ids) => [
+            'items' => array_map(fn ($id, $i) => [
+                'snippet' => ['title' => 'T', 'position' => $i],
+                'contentDetails' => ['videoId' => $id],
+            ], $ids, array_keys($ids)),
+        ];
+
+        Http::fake([
+            'https://www.googleapis.com/youtube/v3/playlistItems*' => Http::sequence()
+                ->push($playlist(['nonmusic001']))                // gonevideo01 vanished → swept
+                ->push($playlist(['nonmusic001', 'gonevideo01'])), // back → re-liked
+        ]);
+
+        $this->artisan('music:sync')->expectsOutputToContain('1 unliked')->assertExitCode(0);
+
+        $gone = Video::where('video_id', 'gonevideo01')->first();
+        $this->assertFalse($gone->is_music);
+        $this->assertNotNull($gone->unliked_at);
+        $this->assertSame('skipped', $gone->track->enrich_status);
+
+        // Re-liked → back to music, track revived; parser non-music untouched.
+        $this->artisan('music:sync')->expectsOutputToContain('1 re-liked')->assertExitCode(0);
+
+        $gone->refresh();
+        $this->assertTrue($gone->is_music);
+        $this->assertNull($gone->unliked_at);
+        $this->assertSame('pending', $gone->track->fresh()->enrich_status);
+        $this->assertFalse(Video::where('video_id', 'nonmusic001')->first()->is_music);
+    }
+
+    public function test_chunked_browser_sync_never_sweeps(): void
+    {
+        $this->connect();
+        Video::create(['video_id' => 'gonevideo02', 'raw_title' => 'E - F', 'fetched_at' => now()]);
+        Http::fake(['https://www.googleapis.com/youtube/v3/playlistItems*' => Http::response(['items' => []])]);
+
+        $this->actingAs($this->user)->postJson(route('music.sync'))->assertOk()->assertJson(['unliked' => 0]);
+
+        $this->assertTrue(Video::where('video_id', 'gonevideo02')->first()->is_music);
+    }
+
     public function test_sync_command_is_a_noop_when_not_connected(): void
     {
         $this->artisan('music:sync')->assertExitCode(0);

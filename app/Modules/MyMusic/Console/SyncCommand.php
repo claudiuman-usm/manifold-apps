@@ -9,8 +9,9 @@ use Illuminate\Console\Command;
 
 /**
  * Unattended full sync of the Liked playlist — a daily cron runs this so new
- * likes land in the library without opening the app. New videos are then
- * parsed + enriched by the every-minute music:enrich cron.
+ * likes land in the library without opening the app. Being a full pass, it
+ * also detects unlikes (video gone from the playlist → marked non-music).
+ * New videos are then parsed + enriched by the every-minute music:enrich cron.
  */
 class SyncCommand extends Command
 {
@@ -35,8 +36,9 @@ class SyncCommand extends Command
         }
 
         $this->info(sprintf(
-            'Scanned %d liked videos — %d new, %d refreshed.',
+            'Scanned %d liked videos — %d new, %d refreshed, %d re-liked, %d unliked.',
             $stats['scanned'], $stats['inserted'], $stats['refreshed'],
+            $stats['reliked'], $stats['unliked'],
         ));
 
         return self::SUCCESS;
