@@ -12,6 +12,9 @@ The displayed version lives in `config/app.php` (`version`) and is shown in the 
 ### Added
 - My Music: **unliking a video on YouTube now marks it non-music** in the library. The daily `music:sync` cron walks the whole Liked playlist, so anything no longer present gets `is_music = false` and an `unliked_at` stamp (ratings and play history are kept). Re-liking the video flips it back to music on the next sync. Only unlike-swept rows flip back — videos marked non-music by the title parser or by hand stay non-music. The browser-driven chunked sync never sweeps (it only sees part of the playlist), and an empty API response is ignored as a safety guard. Cron output now reports re-liked/unliked counts. (New migration: `unliked_at` on `music_videos`.)
 
+### Removed
+- My Music: the Music / All videos / Non-music filter dropdown is gone — with unliking as the way to mark non-music, the library now always shows music only. The per-row "move back to Music" button went with it (re-like the video on YouTube instead).
+
 ## [1.8.6] - 2026-09-29
 
 ### Changed

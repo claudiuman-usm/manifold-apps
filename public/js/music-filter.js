@@ -1,6 +1,7 @@
 /* Shared My Music filter + sort. The library page uses it live; the playlists
    page re-runs a stored filter against fresh data when syncing a playlist.
-   State shape: {q, artists[], genres[], y0, y1, status, mus, sort, dir}. */
+   State shape: {q, artists[], genres[], y0, y1, status, sort, dir}.
+   Non-music rows (unliked on YouTube / parser-flagged) are always excluded. */
 window.MusicFilter = (() => {
     'use strict';
 
@@ -10,11 +11,9 @@ window.MusicFilter = (() => {
         const q = (s.q || '').trim().toLowerCase();
         const y0 = s.y0 ? +s.y0 : null;
         const y1 = s.y1 ? +s.y1 : null;
-        const mus = s.mus || 'music';
 
         const rows = data.filter((r) => {
-            if (mus === 'music' && !r.m) return false;
-            if (mus === 'non' && r.m) return false;
+            if (!r.m) return false;
             if (s.status && r.s !== s.status) return false;
             if (s.rate) {
                 const rt = r.rt || 0;

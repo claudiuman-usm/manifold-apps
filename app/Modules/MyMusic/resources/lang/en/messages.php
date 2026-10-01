@@ -45,9 +45,6 @@ return [
         'year_to' => 'to',
         'status' => 'Status',
         'all_statuses' => 'All statuses',
-        'music_only' => 'Music',
-        'everything' => 'All videos',
-        'non_music' => 'Non-music',
         'play_all' => 'Play all',
         'shuffle' => 'Shuffle',
         'count' => ':shown tracks match your filters, out of :total liked videos.',
@@ -57,7 +54,6 @@ return [
         'no_embed' => 'no embed',
         'search_list' => 'Type to filter…',
         'undo' => 'Undo',
-        'non_music_marked' => '“:title” was marked non-music and left this view.',
         'any_rating' => 'Any rating',
         'rated' => 'Rated',
         'unrated' => 'Unrated',
@@ -95,7 +91,6 @@ return [
         'open' => 'Open in YouTube Music',
         'edit' => 'Edit',
         'toggle' => 'Mark as music / non-music (non-music is hidden from the Music view)',
-        'restore' => 'Move back to Music',
     ],
 
     'edit' => [

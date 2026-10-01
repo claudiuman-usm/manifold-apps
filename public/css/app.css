@@ -746,7 +746,6 @@ body.ctx-music {
 .music-table tbody tr { cursor: pointer; } /* click anywhere on a row to play it */
 .music-table tbody tr:hover { background: var(--accent-soft); }
 .music-table tr.playing { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
-.music-table tr.row-nonmusic { opacity: .55; }
 .music-table .num-col { text-align: right; font-variant-numeric: tabular-nums; width: 1%; white-space: nowrap; }
 .cell-title { font-weight: 600; }
 .cell-channel { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

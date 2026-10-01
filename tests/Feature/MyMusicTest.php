@@ -298,7 +298,7 @@ class MyMusicTest extends TestCase
         $create = $this->actingAs($this->user)
             ->postJson(route('music.playlists.store'), [
                 'name' => 'Chill 90s',
-                'filter' => ['genres' => ['rock'], 'mus' => 'music'],
+                'filter' => ['genres' => ['rock']],
                 'videoIds' => ['v1', 'v2', 'v3'],
             ])
             ->assertOk()

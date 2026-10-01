@@ -74,11 +74,6 @@
                                 <option value="{{ $s }}">{{ __('music::messages.status_labels.'.$s) }}</option>
                             @endforeach
                         </select>
-                        <select id="f-mus" class="select">
-                            <option value="music">{{ __('music::messages.library.music_only') }}</option>
-                            <option value="all">{{ __('music::messages.library.everything') }}</option>
-                            <option value="non">{{ __('music::messages.library.non_music') }}</option>
-                        </select>
                         <select id="f-rate" class="select">
                             <option value="">{{ __('music::messages.library.any_rating') }}</option>
                             <option value="rated">{{ __('music::messages.library.rated') }}</option>
@@ -232,12 +227,9 @@
         'enrich_failed' => __('music::messages.enrich.failed'),
         'count' => __('music::messages.library.count'),
         'no_embed' => __('music::messages.library.no_embed'),
-        'non_music_marked' => __('music::messages.library.non_music_marked'),
         'search_list' => __('music::messages.library.search_list'),
         'open' => __('music::messages.actions.open'),
         'edit' => __('music::messages.actions.edit'),
-        'restore' => __('music::messages.actions.restore'),
-        'toggle' => __('music::messages.actions.toggle'),
         'status' => __('music::messages.status_labels'),
         'pl_tracks' => __('music::messages.playlists.tracks'),
         'pl_estimate' => __('music::messages.playlists.estimate'),
@@ -287,7 +279,6 @@
         y0: params.get('y0') || '',
         y1: params.get('y1') || '',
         status: params.get('status') || '',
-        mus: params.get('mus') || 'music',
         rate: params.get('rate') || '',
         sort: params.get('sort') || 'p',
         dir: params.get('dir') || 'asc',
@@ -300,7 +291,6 @@
         if (state.y0) p.set('y0', state.y0);
         if (state.y1) p.set('y1', state.y1);
         if (state.status) p.set('status', state.status);
-        if (state.mus !== 'music') p.set('mus', state.mus);
         if (state.rate) p.set('rate', state.rate);
         if (state.sort !== 'p' || state.dir !== 'asc') { p.set('sort', state.sort); p.set('dir', state.dir); }
         if (MP.shuffle) p.set('shuffle', '1');
@@ -327,7 +317,7 @@
         const genres = (r.g || []).slice(0, 2).map((g) => `<span class="badge badge-sm">${esc(g)}</span>`).join(' ');
         const playingCls = MP.videoId === r.v ? ' playing' : '';
         const noEmbed = r.e ? '' : ` <span class="badge badge-warning badge-sm">${T.no_embed}</span>`;
-        return `<tr data-i="${i}" data-v="${esc(r.v)}" class="${r.m ? '' : 'row-nonmusic'}${playingCls}">
+        return `<tr data-i="${i}" data-v="${esc(r.v)}" class="${playingCls}">
             <td class="num-col muted">${r.p == null ? '' : r.p + 1}</td>
             <td class="cell-thumb">${r.th ? `<img src="${esc(r.th)}" loading="lazy" alt="">` : ''}</td>
             <td class="cell-clamp cell-artist" title="${esc(r.a || r.c || '')}">${esc(r.a) || `<span class="muted">${esc(r.c || '—')}</span>`}</td>
@@ -341,7 +331,6 @@
             <td class="cell-actions">
                 <a class="rowbtn" href="https://music.youtube.com/watch?v=${esc(r.v)}" target="_blank" rel="noopener" title="${T.open}">↗</a>
                 <button type="button" class="rowbtn" data-act="edit" title="${T.edit}">✎</button>
-                ${state.mus === 'non' ? `<button type="button" class="rowbtn" data-act="restore" title="${T.restore}">♪</button>` : ''}
             </td>
         </tr>`;
     }
@@ -372,7 +361,7 @@
     function buildOptions() {
         const artists = new Map(), genres = new Map();
         DATA.forEach((r) => {
-            if (state.mus === 'music' && !r.m) return;
+            if (!r.m) return;
             const a = r.a || '—';
             artists.set(a, (artists.get(a) || 0) + 1);
             (r.gf || []).forEach((g) => genres.set(g, (genres.get(g) || 0) + 1));
@@ -435,20 +424,18 @@
     $('f-y0').value = state.y0;
     $('f-y1').value = state.y1;
     $('f-status').value = state.status;
-    $('f-mus').value = state.mus;
     $('f-rate').value = state.rate;
 
     $('f-q').addEventListener('input', () => { state.q = $('f-q').value; render(); });
     $('f-y0').addEventListener('input', () => { state.y0 = $('f-y0').value; render(); });
     $('f-y1').addEventListener('input', () => { state.y1 = $('f-y1').value; render(); });
     $('f-status').addEventListener('change', () => { state.status = $('f-status').value; render(); });
-    $('f-mus').addEventListener('change', () => { state.mus = $('f-mus').value; render(); });
     $('f-rate').addEventListener('change', () => { state.rate = $('f-rate').value; render(); });
     $('clear-filters').addEventListener('click', () => {
-        Object.assign(state, { q: '', y0: '', y1: '', status: '', mus: 'music', rate: '' });
+        Object.assign(state, { q: '', y0: '', y1: '', status: '', rate: '' });
         state.artists.clear(); state.genres.clear();
         $('f-q').value = $('f-y0').value = $('f-y1').value = '';
-        $('f-status').value = ''; $('f-mus').value = 'music'; $('f-rate').value = '';
+        $('f-status').value = ''; $('f-rate').value = '';
         msArtist.refreshBtn(); msGenre.refreshBtn();
         render();
     });
@@ -515,14 +502,6 @@
         }
         if (btn.dataset.act === 'edit') openEdit(row);
         else if (btn.dataset.act === 'rate') MP.rate(row, +btn.dataset.n).catch(() => {});
-        else if (btn.dataset.act === 'restore') {
-            // Only offered in the Non-music view: move the track back to Music.
-            api(`${URLS.videos}/${row.vid}/toggle-music`, 'POST').then((d) => {
-                row.m = d.is_music;
-                if (row.m && row.s === 'skipped') row.s = 'pending';
-                render();
-            }).catch(() => {});
-        }
     });
 
     /* ---------- Edit dialog ---------- */
@@ -649,7 +628,7 @@
                 name: $('p-name').value,
                 filter: {
                     q: state.q, artists: [...state.artists], genres: [...state.genres],
-                    y0: state.y0, y1: state.y1, status: state.status, mus: state.mus,
+                    y0: state.y0, y1: state.y1, status: state.status,
                     sort: state.sort, dir: state.dir,
                 },
                 videoIds: rows.map((r) => r.v),

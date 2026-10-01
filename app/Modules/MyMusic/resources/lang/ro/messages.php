@@ -45,9 +45,6 @@ return [
         'year_to' => 'până în',
         'status' => 'Stare',
         'all_statuses' => 'Toate stările',
-        'music_only' => 'Muzică',
-        'everything' => 'Toate videourile',
-        'non_music' => 'Non-muzică',
         'play_all' => 'Redă tot',
         'shuffle' => 'Amestecă',
         'count' => ':shown piese trec de filtre, din :total videouri Liked.',
@@ -57,7 +54,6 @@ return [
         'no_embed' => 'fără embed',
         'search_list' => 'Tastează pentru a filtra…',
         'undo' => 'Anulează',
-        'non_music_marked' => '„:title” a fost marcată ca non-muzică și a ieșit din această listă.',
         'any_rating' => 'Orice notă',
         'rated' => 'Notate',
         'unrated' => 'Nenotate',
@@ -95,7 +91,6 @@ return [
         'open' => 'Deschide în YouTube Music',
         'edit' => 'Editează',
         'toggle' => 'Marchează muzică / non-muzică (non-muzica e ascunsă din lista Muzică)',
-        'restore' => 'Mută înapoi la Muzică',
     ],
 
     'edit' => [
