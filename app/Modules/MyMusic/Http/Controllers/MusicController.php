@@ -64,6 +64,7 @@ class MusicController extends Controller
                 'th' => $v->thumbnail,
                 'rt' => $v->rating,
                 'pc' => $v->play_count,
+                'tp' => $v->tempo,
             ])
             ->values();
     }

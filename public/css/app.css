@@ -769,9 +769,23 @@ body.player-open .content { padding-bottom: 240px; }
 .player-info { flex: 1; min-width: 0; }
 .player-title { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-sub { font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.player-stars { margin: 4px 0 2px; }
+.player-meta { display: flex; align-items: center; gap: 14px; margin: 4px 0 2px; }
+.player-stars { display: flex; align-items: center; }
 .player-stars .star { font-size: 1.2rem; padding: 0 3px 0 0; }
-.player-keys { font-size: .72rem; margin-top: 6px; }
+.player-tempo { display: flex; align-items: center; gap: 6px; }
+.player-tempo button {
+    border: 1px solid var(--text-3); background: none; cursor: pointer;
+    font-size: .66rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase;
+    line-height: 1; padding: 5px 10px; border-radius: 6px; color: var(--text-3);
+}
+.player-tempo button:hover { color: var(--text); border-color: var(--text); }
+.player-tempo button.on { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+/* Sits where the keyboard hints used to be, under the scrub bar. */
+.player-goto {
+    display: block; border: 0; background: none; cursor: pointer; padding: 0;
+    margin-top: 6px; font-size: .78rem; color: var(--accent); font-weight: 600;
+}
+.player-goto:hover { text-decoration: underline; }
 .player-controls { display: flex; gap: 10px; flex: none; align-items: center; }
 .player-controls .active { color: var(--accent); border-color: var(--accent); }
 /* Bigger, round transport buttons; play/pause is the largest (primary). */
@@ -789,7 +803,6 @@ body.player-open .content { padding-bottom: 240px; }
 }
 @media (max-width: 720px) {
     .player-frame { width: 168px; height: 94px; }
-    .player-keys { display: none; }
     body.player-open .content { padding-bottom: 150px; }
 }
 

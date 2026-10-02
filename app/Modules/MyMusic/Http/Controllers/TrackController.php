@@ -73,6 +73,15 @@ class TrackController extends Controller
         return response()->json(['play_count' => $video->play_count]);
     }
 
+    /** Set / clear the manual slow/fast tempo mark (stored on the video, like the rating). */
+    public function tempo(Request $request, Video $video)
+    {
+        $data = $request->validate(['tempo' => ['nullable', 'in:slow,fast']]);
+        $video->update(['tempo' => $data['tempo'] ?? null]);
+
+        return response()->json(['tempo' => $video->tempo]);
+    }
+
     /** Set / clear the 0–3 star rating (rating stored on the video, the stable per-row entity). */
     public function rate(Request $request, Video $video)
     {

@@ -1,6 +1,6 @@
 /* Shared My Music filter + sort. The library page uses it live; the playlists
    page re-runs a stored filter against fresh data when syncing a playlist.
-   State shape: {q, artists[], genres[], y0, y1, status, sort, dir}.
+   State shape: {q, artists[], genres[], y0, y1, status, rate, tempo, sort, dir}.
    Non-music rows (unliked on YouTube / parser-flagged) are always excluded. */
 window.MusicFilter = (() => {
     'use strict';
@@ -21,6 +21,9 @@ window.MusicFilter = (() => {
                 else if (s.rate === 'unrated' && rt > 0) return false;
                 else if (s.rate === 'unplayed' && (r.pc || 0) > 0) return false;
                 else if (/^[123]$/.test(s.rate) && rt < +s.rate) return false;
+            }
+            if (s.tempo) {
+                if (s.tempo === 'none' ? r.tp : r.tp !== s.tempo) return false;
             }
             if (artists.size && !artists.has(r.a || '—')) return false;
             if (genres.size && !(r.gf || []).some((g) => genres.has(g))) return false;

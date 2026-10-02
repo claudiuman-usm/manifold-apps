@@ -58,6 +58,10 @@ return [
         'rated' => 'Rated',
         'unrated' => 'Unrated',
         'unplayed' => 'Never played',
+        'any_tempo' => 'Any tempo',
+        'tempo_slow' => 'Slow',
+        'tempo_fast' => 'Fast',
+        'tempo_unmarked' => 'Tempo not marked',
     ],
 
     'side' => [
@@ -111,8 +115,12 @@ return [
         'next' => 'Next',
         'shuffle' => 'Shuffle',
         'close' => 'Close player',
-        'keys' => 'space play/pause · ← prev · → next',
         'to_top' => 'Back to top',
+        'tempo_slow' => 'Mark as slow',
+        'tempo_fast' => 'Mark as fast',
+        'slow' => 'Slow',
+        'fast' => 'Fast',
+        'go_to_song' => 'Go to song',
     ],
 
     'playlists' => [

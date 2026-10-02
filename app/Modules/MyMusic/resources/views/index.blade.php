@@ -83,6 +83,12 @@
                             <option value="unrated">{{ __('music::messages.library.unrated') }}</option>
                             <option value="unplayed">{{ __('music::messages.library.unplayed') }}</option>
                         </select>
+                        <select id="f-tempo" class="select">
+                            <option value="">{{ __('music::messages.library.any_tempo') }}</option>
+                            <option value="slow">{{ __('music::messages.library.tempo_slow') }}</option>
+                            <option value="fast">{{ __('music::messages.library.tempo_fast') }}</option>
+                            <option value="none">{{ __('music::messages.library.tempo_unmarked') }}</option>
+                        </select>
                         <button type="button" id="clear-filters" class="btn btn-sm btn-ghost">{{ __('music::messages.library.clear') }}</button>
                     </div>
                 </div>
@@ -280,6 +286,7 @@
         y1: params.get('y1') || '',
         status: params.get('status') || '',
         rate: params.get('rate') || '',
+        tempo: params.get('tempo') || '',
         sort: params.get('sort') || 'p',
         dir: params.get('dir') || 'asc',
     };
@@ -292,6 +299,7 @@
         if (state.y1) p.set('y1', state.y1);
         if (state.status) p.set('status', state.status);
         if (state.rate) p.set('rate', state.rate);
+        if (state.tempo) p.set('tempo', state.tempo);
         if (state.sort !== 'p' || state.dir !== 'asc') { p.set('sort', state.sort); p.set('dir', state.dir); }
         if (MP.shuffle) p.set('shuffle', '1');
         history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
@@ -425,17 +433,19 @@
     $('f-y1').value = state.y1;
     $('f-status').value = state.status;
     $('f-rate').value = state.rate;
+    $('f-tempo').value = state.tempo;
 
     $('f-q').addEventListener('input', () => { state.q = $('f-q').value; render(); });
     $('f-y0').addEventListener('input', () => { state.y0 = $('f-y0').value; render(); });
     $('f-y1').addEventListener('input', () => { state.y1 = $('f-y1').value; render(); });
     $('f-status').addEventListener('change', () => { state.status = $('f-status').value; render(); });
     $('f-rate').addEventListener('change', () => { state.rate = $('f-rate').value; render(); });
+    $('f-tempo').addEventListener('change', () => { state.tempo = $('f-tempo').value; render(); });
     $('clear-filters').addEventListener('click', () => {
-        Object.assign(state, { q: '', y0: '', y1: '', status: '', rate: '' });
+        Object.assign(state, { q: '', y0: '', y1: '', status: '', rate: '', tempo: '' });
         state.artists.clear(); state.genres.clear();
         $('f-q').value = $('f-y0').value = $('f-y1').value = '';
-        $('f-status').value = ''; $('f-rate').value = '';
+        $('f-status').value = ''; $('f-rate').value = ''; $('f-tempo').value = '';
         msArtist.refreshBtn(); msGenre.refreshBtn();
         render();
     });
@@ -486,6 +496,13 @@
     document.addEventListener('music:noembed', (e) => {
         const row = DATA.find((r) => r.v === e.detail.v);
         if (row) row.e = false;
+    }, { signal: SIG });
+
+    document.addEventListener('music:tempo', (e) => {
+        const row = DATA.find((r) => r.v === e.detail.v);
+        if (!row) return;
+        row.tp = e.detail.tp;
+        if (state.tempo) render(); // an active tempo filter may now include/exclude the row
     }, { signal: SIG });
 
     /* ---------- Row actions (click anywhere on a row to play it) ---------- */
@@ -629,6 +646,7 @@
                 filter: {
                     q: state.q, artists: [...state.artists], genres: [...state.genres],
                     y0: state.y0, y1: state.y1, status: state.status,
+                    rate: state.rate, tempo: state.tempo,
                     sort: state.sort, dir: state.dir,
                 },
                 videoIds: rows.map((r) => r.v),

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.10.0] - 2026-10-02
+
+### Added
+- My Music: **manual tempo marks** — SLOW / FAST pill buttons on the docked player mark the playing track as you listen; clicking the active mark clears it. Stored on the video row like the rating. (New migration: `tempo` on `music_videos`.)
+- My Music: a **Tempo filter** in the sidebar (Any / Slow / Fast / Not marked) — "Not marked" is handy for sweeping through what's left to classify. Included in the URL state and in saved playlist filters (the star-rating filter is now saved with playlists too).
+- My Music: a **"Go to song" link** on the docked player scrolls the library to the playing row; from the Playlists/Stats pages it first swaps back to the library.
+
+### Removed
+- My Music: the keyboard-hints line on the docked player ("space play/pause · ← prev · → next") — the Go to song link sits there now. The shortcuts themselves still work.
+
 ## [1.9.0] - 2026-10-01
 
 ### Added

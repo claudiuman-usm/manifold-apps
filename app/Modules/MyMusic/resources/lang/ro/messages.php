@@ -58,6 +58,10 @@ return [
         'rated' => 'Notate',
         'unrated' => 'Nenotate',
         'unplayed' => 'Neascultate',
+        'any_tempo' => 'Orice tempo',
+        'tempo_slow' => 'Lente',
+        'tempo_fast' => 'Rapide',
+        'tempo_unmarked' => 'Fără tempo marcat',
     ],
 
     'side' => [
@@ -111,8 +115,12 @@ return [
         'next' => 'Următor',
         'shuffle' => 'Amestecă',
         'close' => 'Închide playerul',
-        'keys' => 'spațiu redă/pauză · ← anterior · → următor',
         'to_top' => 'Înapoi sus',
+        'tempo_slow' => 'Marchează ca lentă',
+        'tempo_fast' => 'Marchează ca rapidă',
+        'slow' => 'Lent',
+        'fast' => 'Rapid',
+        'go_to_song' => 'Mergi la piesă',
     ],
 
     'playlists' => [

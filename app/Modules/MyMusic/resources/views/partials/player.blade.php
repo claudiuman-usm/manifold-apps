@@ -1,6 +1,6 @@
 {{-- Docked player. Lives OUTSIDE #music-page so it (and its YouTube iframe)
      survives in-module navigation; public/js/music-player.js owns it. --}}
-<div id="player-bar" class="player-bar hidden" data-videos-url="{{ url('music/videos') }}">
+<div id="player-bar" class="player-bar hidden" data-videos-url="{{ url('music/videos') }}" data-library-url="{{ route('music.index') }}">
     <div id="yt-frame-holder" class="player-frame">
         <div id="yt-player"></div>
         {{-- Artwork covers the video; the iframe keeps playing under it. --}}
@@ -9,13 +9,19 @@
     <div class="player-info">
         <div class="player-title" id="player-title"></div>
         <div class="player-sub muted" id="player-sub"></div>
-        <div class="player-stars" id="player-stars"></div>
+        <div class="player-meta">
+            <div class="player-stars" id="player-stars"></div>
+            <div class="player-tempo hidden" id="player-tempo">
+                <button type="button" data-tempo="slow" title="{{ __('music::messages.player.tempo_slow') }}">{{ __('music::messages.player.slow') }}</button>
+                <button type="button" data-tempo="fast" title="{{ __('music::messages.player.tempo_fast') }}">{{ __('music::messages.player.fast') }}</button>
+            </div>
+        </div>
         <div class="player-scrub">
             <span class="num" id="time-now">0:00</span>
             <input type="range" id="seek" class="seek" min="0" max="0" step="1" value="0" aria-label="Seek">
             <span class="num muted" id="time-total">0:00</span>
         </div>
-        <div class="player-keys muted">{{ __('music::messages.player.keys') }}</div>
+        <button type="button" class="player-goto hidden" id="pl-goto">{{ __('music::messages.player.go_to_song') }}</button>
     </div>
     <div class="player-controls">
         <button type="button" class="btn btn-ghost btn-sm" id="pl-prev" title="{{ __('music::messages.player.prev') }}">⏮</button>

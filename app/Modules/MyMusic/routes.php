@@ -44,3 +44,4 @@ Route::post('videos/{video}/toggle-music', [TrackController::class, 'toggleMusic
 Route::post('videos/{video}/not-embeddable', [TrackController::class, 'markNotEmbeddable'])->name('videos.not-embeddable');
 Route::post('videos/{video}/played', [TrackController::class, 'recordPlay'])->name('videos.played');
 Route::post('videos/{video}/rate', [TrackController::class, 'rate'])->name('videos.rate');
+Route::post('videos/{video}/tempo', [TrackController::class, 'tempo'])->name('videos.tempo');

@@ -9,6 +9,7 @@
      music:trackchange {v}   a track started (v null: player closed / list mode)
      music:played {v, pc}    a play was counted
      music:rated {v, rt}     a rating changed (bar stars or MusicPlayer.rate)
+     music:tempo {v, tp}     a slow/fast tempo mark changed (bar buttons)
      music:noembed {v}       a video turned out not embeddable
      music:shuffle {on}      shuffle was toggled */
 window.MusicPlayer = window.MusicPlayer || (() => {
@@ -143,7 +144,7 @@ window.MusicPlayer = window.MusicPlayer || (() => {
         $('player-art').classList.add('hidden'); // show the video itself
         $('player-title').textContent = name || '';
         $('player-sub').textContent = '';
-        $('player-stars').innerHTML = '';
+        refreshStars(); // clears stars + hides tempo/go-to (no queue row in list mode)
         resetScrub();
         if (ready) yt.loadPlaylist({ list: id, listType: 'playlist' });
         else { wantedList = id; loadYtApi(); }
@@ -163,6 +164,7 @@ window.MusicPlayer = window.MusicPlayer || (() => {
     function refreshStars() {
         const row = currentRow();
         $('player-stars').innerHTML = row ? starsHtml(row) : '';
+        refreshTempo();
     }
 
     function rate(row, n) {
@@ -182,6 +184,48 @@ window.MusicPlayer = window.MusicPlayer || (() => {
         const btn = e.target.closest('[data-act="rate"]');
         const row = currentRow();
         if (btn && row) rate(row, +btn.dataset.n).catch(() => {});
+    });
+
+    /* ---------- Tempo mark (slow / fast, docked-player buttons) ---------- */
+    function refreshTempo() {
+        const row = currentRow();
+        $('player-tempo').classList.toggle('hidden', !row);
+        $('pl-goto').classList.toggle('hidden', !row);
+        if (!row) return;
+        $('player-tempo').querySelectorAll('[data-tempo]').forEach((b) => {
+            b.classList.toggle('on', row.tp === b.dataset.tempo);
+        });
+    }
+
+    function setTempo(row, t) {
+        // Click the mark that's already set → clear it.
+        const next = row.tp === t ? null : t;
+        return api(`${VIDEOS}/${row.vid}/tempo`, 'POST', { tempo: next }).then((d) => {
+            const q = queue.find((r) => r.v === row.v);
+            if (q) q.tp = d.tempo;
+            if (videoId === row.v) refreshTempo();
+            emit('music:tempo', { v: row.v, tp: d.tempo });
+            return d.tempo;
+        });
+    }
+
+    $('player-tempo').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-tempo]');
+        const row = currentRow();
+        if (btn && row) setTempo(row, btn.dataset.tempo).catch(() => {});
+    });
+
+    /* ---------- Go to song (scroll the library to the playing row) ---------- */
+    $('pl-goto').addEventListener('click', async () => {
+        if (!videoId) return;
+        const find = () => document.querySelector(`#track-table tr[data-v="${CSS.escape(videoId)}"]`);
+        let tr = find();
+        // Not on the library page → swap to it first, then look again.
+        if (!tr && !document.getElementById('track-table')) {
+            await visit(bar.dataset.libraryUrl);
+            tr = find();
+        }
+        if (tr) tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
     });
 
     /* ---------- Scrub bar ---------- */
