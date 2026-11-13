@@ -337,7 +337,7 @@
             <td class="num-col col-plays muted">${r.pc || ''}</td>
             <td class="muted cell-channel col-channel">${esc(r.c || '')}</td>
             <td class="cell-actions">
-                <a class="rowbtn" href="https://music.youtube.com/watch?v=${esc(r.v)}" target="_blank" rel="noopener" title="${T.open}">↗</a>
+                <a class="rowbtn" href="https://www.youtube.com/watch?v=${esc(r.v)}" target="_blank" rel="noopener" title="${T.open}">↗</a>
                 <button type="button" class="rowbtn" data-act="edit" title="${T.edit}">✎</button>
             </td>
         </tr>`;

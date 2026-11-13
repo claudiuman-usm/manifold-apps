@@ -92,7 +92,7 @@ return [
 
     'actions' => [
         'play' => 'Play',
-        'open' => 'Open in YouTube Music',
+        'open' => 'Open in YouTube',
         'edit' => 'Edit',
         'toggle' => 'Mark as music / non-music (non-music is hidden from the Music view)',
     ],
@@ -137,7 +137,7 @@ return [
         'paused' => 'Daily quota exhausted — resume tomorrow (resets midnight Pacific).',
         'done' => 'Playlist ready.',
         'empty' => 'No playlists yet — filter the library and hit “Create playlist”.',
-        'open' => 'YT Music',
+        'open' => 'YouTube',
         'play' => 'Play',
         'resume' => 'Resume',
         'sync' => 'Sync',

@@ -353,7 +353,7 @@ class MyMusicTest extends TestCase
             ->get(route('music.playlists.index'))
             ->assertOk()
             ->assertSee('Road trip')
-            ->assertSee('music.youtube.com/playlist?list=PL9');
+            ->assertSee('www.youtube.com/playlist?list=PL9');
     }
 
     public function test_recording_a_play_increments_count_and_logs(): void

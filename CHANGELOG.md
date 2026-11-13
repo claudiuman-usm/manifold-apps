@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.10.1] - 2026-11-13
+
+### Changed
+- My Music: the ↗ links now open normal YouTube instead of YouTube Music — the "open original" button on a track row (`youtube.com/watch`) and the playlist link on the Playlists page (`youtube.com/playlist`). Labels/tooltips updated accordingly (EN/RO).
+
 ## [1.10.0] - 2026-10-02
 
 ### Added

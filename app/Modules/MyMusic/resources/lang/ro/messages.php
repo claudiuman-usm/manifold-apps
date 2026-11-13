@@ -92,7 +92,7 @@ return [
 
     'actions' => [
         'play' => 'Redă',
-        'open' => 'Deschide în YouTube Music',
+        'open' => 'Deschide în YouTube',
         'edit' => 'Editează',
         'toggle' => 'Marchează muzică / non-muzică (non-muzica e ascunsă din lista Muzică)',
     ],
@@ -137,7 +137,7 @@ return [
         'paused' => 'Cota zilnică e epuizată — reia mâine (se resetează la miezul nopții, ora Pacificului).',
         'done' => 'Playlist gata.',
         'empty' => 'Niciun playlist încă — filtrează biblioteca și apasă „Creează playlist”.',
-        'open' => 'YT Music',
+        'open' => 'YouTube',
         'play' => 'Redă',
         'resume' => 'Reia',
         'sync' => 'Sincronizează',

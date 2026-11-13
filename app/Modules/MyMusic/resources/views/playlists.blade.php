@@ -47,7 +47,7 @@
                         <div class="flex gap-sm" style="flex-wrap:wrap;">
                             @if ($p->youtube_id)
                                 <a class="btn btn-sm btn-ghost" target="_blank" rel="noopener"
-                                   href="https://music.youtube.com/playlist?list={{ $p->youtube_id }}">↗ {{ __('music::messages.playlists.open') }}</a>
+                                   href="https://www.youtube.com/playlist?list={{ $p->youtube_id }}">↗ {{ __('music::messages.playlists.open') }}</a>
                                 <button type="button" class="btn btn-sm btn-primary" data-act="play">▶ {{ __('music::messages.playlists.play') }}</button>
                             @endif
                             @if (count($p->queue ?? []) > 0)
