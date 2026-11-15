@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.14.1] - 2026-11-15
+
+### Fixed
+- PodPlan 1.2.1: ticking an item on the checklist no longer **jumps the page back to the top**. The masonry layout from 1.13.0 rebuilt the cards after every tick and let the page collapse for a moment; the list now keeps its height and the page its scroll position while it is redrawn. The same goes for the automatic refresh every few seconds, on your Checklist screen and on the shared page.
+
 ## [1.14.0] - 2026-11-15
 
 ### Added

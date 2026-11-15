@@ -226,8 +226,10 @@
         if (!shown) {
             h += '<div class="pp-card pp-muted" style="padding-bottom:14px;">' + esc(!c.total ? T.c.empty : filter === 'rented' ? T.c.nothing_rented : T.c.nothing_left) + '</div>';
         }
-        list.innerHTML = h;
-        if (shown) masonry();
+        keepPlace(function () {
+            list.innerHTML = h;
+            if (shown) masonry();
+        });
 
         if (OWNER) renderOwner();
     }
@@ -238,6 +240,20 @@
      * first cards go across the top, and each next one drops into whichever
      * column is shortest so far.
      */
+    /*
+     * Redrawing the cards empties the list for a moment. If the page were
+     * allowed to get shorter meanwhile, the browser would pull the scroll
+     * position up and a tick would throw you back to the top. So the list
+     * keeps its height while it is rebuilt, and the page stays where it was.
+     */
+    function keepPlace(redraw) {
+        var y = window.scrollY;
+        list.style.minHeight = list.offsetHeight + 'px';
+        redraw();
+        list.style.minHeight = '';
+        if (window.scrollY !== y) window.scrollTo({top: y, behavior: 'instant'});
+    }
+
     var COL = 290, GAP = 14, colCount = 0, laidOut = false;
     function columnsThatFit() { return Math.max(1, Math.floor((list.clientWidth + GAP) / (COL + GAP))); }
     function masonry() {
@@ -262,7 +278,7 @@
     // A wider or narrower page, or the list coming back on screen, changes how many columns fit.
     function refit() {
         if (!list.clientWidth) return;
-        if (!laidOut ? list.querySelector('.pp-card:not(.pp-muted)') : columnsThatFit() !== colCount) masonry();
+        if (!laidOut ? list.querySelector('.pp-card:not(.pp-muted)') : columnsThatFit() !== colCount) keepPlace(masonry);
     }
     if (window.ResizeObserver) new ResizeObserver(refit).observe(list);
     else window.addEventListener('resize', refit);

@@ -107,6 +107,9 @@ Cards are laid out as masonry by `masonry()` in `partials/checklist-app`: as
 many columns as fit at 290 px, and each card, in order, goes into the shortest
 column so far. It re-runs after every render and when the width changes; while
 the list is hidden (the shared page's Plan tab) it waits until it is shown.
+Every redraw goes through `keepPlace()`, which holds the list's height and the
+page's scroll position: without it the list is empty for a moment, the page
+gets shorter, and a tick throws the reader back to the top.
 
 ## How the checklist is stored
 
