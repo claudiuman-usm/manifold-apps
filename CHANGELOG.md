@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.11.0] - 2026-11-15
+
+### Added
+- **PodPlan** — a new tool (`/podplan`) for planning a shoot and packing for it. Create a project (name, type, date, location, people on camera, live mixing yes/no), lay the set out on a top-down plan, and the packing checklist builds itself from what is on the plan.
+- PodPlan wears the **hub's own look**: glass panels over colour orbs, the hub's type and pill buttons, a sky-blue palette and dark mode, with the hub breadcrumb and a pill menu on every screen.
+- PodPlan on a **phone**: the whole diagram fits the width with larger labels and tap areas; gear, checklist and describe open as sheets from a bar at the bottom, and the diagram stays in view above them; a selected camera's lens, connection, turning and field of view sit in a sheet under the diagram.
+- PodPlan: **Plan** screen — tap gear from your inventory to place it, drag to move, turn cameras. Cable lines follow the gear type (XLR mics run to the audio mixer, cameras run to the video mixer while live mixing is on, wireless mics draw nothing). Each camera's label shows the lens chosen for it.
+- PodPlan: **FOH**, a mixer corner on the plan (bottom right) where video and audio mixers land by default, stacked with their names beside them. Cables no longer cut across the set: each one runs from its gear straight to the edge of the canvas, follows the edge, and comes in to the mixer from there, in its own lane.
+- PodPlan: the camera **field of view** follows the lens — a longer focal length draws a narrower cone, and a speed booster widens it again (worked out from the lens and adapter names, for the Blackmagic 4K sensor). A "Field of view" tick box on the plan hides the cones.
+- PodPlan: **lights turn and throw a beam** like cameras — a new light starts aimed at the table — and the angle of any camera or light can be set by hand from the plan toolbar (− / +), with Auto to hand it back to the lens. (New migration: `fov` on `podplan_placements`.)
+- PodPlan: the checklist now includes **the gear itself** as a row to tick (the camera, the light, the mixer), not only what goes with it, and has a **Rented** filter showing everything that is not yours and who it comes from.
+- PodPlan: the lens is chosen from a **dropdown** on the plan — in the checklist preview, and in the toolbar under the plan as soon as a camera is selected, so there is no hunting for it in the list. The two stay in sync.
+- PodPlan: a camera's link to the video mixer can be **wireless**. With live mixing on, a Connection choice follows the lens (Cable by default): Cable puts the HDMI cable on the checklist, Wireless puts a wireless video transmitter and receiver there instead and draws no cable line. Both are new accessory kinds, with one of each added to the inventory. (New migration.)
+- PodPlan: every camera and every light brings a **power cord** on the checklist (for lights the old "Power cable" line was renamed). A camera on a wireless link shows a small **wireless mark**, and so does the video mixer in FOH that receives it. (New migration.)
+- PodPlan: a **search** box on the Inventory screen, filtering the table as you type by name, type, who it is rented from, or what goes with it.
+- PodPlan has its **own version** (`module.php`, starting at 1.0.0), shown next to its name in the module menu and at the foot of the shared packing page.
+- PodPlan: **kits with several pieces** — a wireless kit with two lavs is placed twice (A and B, one per person) and still packs as one kit. New wireless gear starts at 2 pieces; any plan gear can be given more in Inventory.
+- PodPlan: **search** above the gear list on the plan, filtering as you type by name, type or who it is rented from.
+- PodPlan: the checklist can be sorted **By gear** or **By kind** (all tripods together, all stands, all lenses), each row saying which gear it is for.
+- PodPlan: **module navigation** on every screen — Projects, Plan, Checklist, Inventory. Plan and Checklist open the project you are in, or the one you opened last.
+- PodPlan: **rule engine** — every gear type has preset rules in four buckets (always / if live mixing / if no live mixing / ask me every time), and any item can override them. Accessories (tripods, light stands, SSDs, lenses, adapters, monitors, FetHeads) are counted pools: your own units are used first, rented ones only when those run out, and a "short" warning shows when a pool is empty.
+- PodPlan: **Checklist** screen — the only place items get ticked, and only for packing: lenses are chosen on the Plan, never here. Progress bar, All / To pack filter, a note of any choice still open, your own extra items, and a Reset button so a project can be reused. Ticks survive a rebuild and reset when gear is removed and put back.
+- PodPlan: **Pack together** — a secret link to one project's checklist. Anyone holding it can tick items with you, with no login, and it opens nothing else. Replace the link or stop sharing at any time.
+- PodPlan: **Inventory** screen — kinds of gear down the side, each kind a panel that says once what every item of it brings, and rows that only say what an item does differently ("No Light stand", "+ Mic preamp"). A kind's own rules are editable, an item can differ or be made the rule for its kind, and project-wide general rules have their own view.
+- PodPlan: **Describe** — describe the shoot in words and Claude places gear from your inventory to match (structured output, Claude Opus 5.5, server-side). It never places gear you do not own; that comes back as a list. Keep, Undo, or ask for a change. Hidden when no `ANTHROPIC_API_KEY` is set.
+- PodPlan: your gear list is seeded as the starting inventory. (New migrations: `podplan_*` tables and the inventory seed — run `/_deploy/migrate` after pulling.)
+
 ## [1.10.1] - 2026-11-13
 
 ### Changed
