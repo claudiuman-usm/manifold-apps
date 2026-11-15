@@ -227,9 +227,45 @@
             h += '<div class="pp-card pp-muted" style="padding-bottom:14px;">' + esc(!c.total ? T.c.empty : filter === 'rented' ? T.c.nothing_rented : T.c.nothing_left) + '</div>';
         }
         list.innerHTML = h;
+        if (shown) masonry();
 
         if (OWNER) renderOwner();
     }
+
+    /*
+     * Masonry: cards are as tall as their lists, so instead of rows with gaps
+     * under the short ones they are stacked in columns. The order is kept: the
+     * first cards go across the top, and each next one drops into whichever
+     * column is shortest so far.
+     */
+    var COL = 290, GAP = 14, colCount = 0, laidOut = false;
+    function columnsThatFit() { return Math.max(1, Math.floor((list.clientWidth + GAP) / (COL + GAP))); }
+    function masonry() {
+        // While the list is not on screen (the Plan tab of the shared page) nothing
+        // can be measured: it is laid out when it comes back.
+        laidOut = !!list.clientWidth;
+        if (!laidOut) return;
+        var cards = Array.prototype.slice.call(list.querySelectorAll('.pp-card'));
+        var cols = [];
+        colCount = columnsThatFit();
+        list.innerHTML = '';
+        for (var i = 0; i < colCount; i++) {
+            cols.push(list.appendChild(document.createElement('div')));
+            cols[i].className = 'pp-cl-col';
+        }
+        cards.forEach(function (card) {
+            var best = cols[0];
+            cols.forEach(function (c) { if (c.offsetHeight < best.offsetHeight) best = c; });
+            best.appendChild(card);
+        });
+    }
+    // A wider or narrower page, or the list coming back on screen, changes how many columns fit.
+    function refit() {
+        if (!list.clientWidth) return;
+        if (!laidOut ? list.querySelector('.pp-card:not(.pp-muted)') : columnsThatFit() !== colCount) masonry();
+    }
+    if (window.ResizeObserver) new ResizeObserver(refit).observe(list);
+    else window.addEventListener('resize', refit);
 
     function renderOwner() {
         var box = document.getElementById('pp-cl-share'), url = payload.share_url, h;

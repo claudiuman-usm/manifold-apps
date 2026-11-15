@@ -580,6 +580,27 @@ class PlanService
     // ---------------------------------------------------------------- state
 
     /** Everything the Plan screen draws, in one payload. */
+    /**
+     * The plan as a guest on the secret link may see it: what is drawn and
+     * nothing more. No inventory, no checklist, no item or rental details.
+     */
+    public function publicState(Project $project): array
+    {
+        $state = $this->state($project);
+        $drawn = array_flip([
+            'id', 'kind', 'symbol', 'role', 'label', 'sub', 'x', 'y', 'rot', 'fov',
+            'number', 'wireless', 'wireless_rx', 'across',
+        ]);
+
+        return [
+            'canvas' => $state['canvas'],
+            'placements' => array_map(fn ($p) => array_intersect_key($p, $drawn), $state['placements']),
+            'cables' => $state['cables'],
+            'axis' => $state['axis'],
+            'plan_warnings' => $state['plan_warnings'],
+        ];
+    }
+
     public function state(Project $project): array
     {
         $project->refresh();

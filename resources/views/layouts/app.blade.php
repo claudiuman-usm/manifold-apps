@@ -42,6 +42,11 @@
                 @include('partials.locale-switch')
                 @include('partials.theme-toggle')
 
+                <a href="{{ route('password.edit') }}"
+                   class="navlink {{ request()->routeIs('password.*') ? 'active' : '' }}">
+                    {{ __('hub.nav.password') }}
+                </a>
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="navlink" style="border:0;background:none;cursor:pointer;font:inherit;">

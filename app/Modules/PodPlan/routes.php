@@ -62,5 +62,6 @@ Route::delete('inventory/general-rules/{rule}', [InventoryController::class, 'de
 Route::middleware('throttle:240,1')->withoutMiddleware('auth')->group(function () {
     Route::get('s/{token}', [ShareController::class, 'show'])->name('share.show');
     Route::get('s/{token}/state', [ShareController::class, 'state'])->name('share.state');
+    Route::get('s/{token}/plan', [ShareController::class, 'plan'])->name('share.plan');
     Route::post('s/{token}/ticks', [ShareController::class, 'tick'])->name('share.tick');
 });

@@ -103,6 +103,11 @@ gear** (one card per placed item) or **by kind** (one card per accessory type,
 plus one for loose items), using the `kind` / `kind_sort` each generated row
 carries. The sort and the All / To pack filter are per-device preferences.
 
+Cards are laid out as masonry by `masonry()` in `partials/checklist-app`: as
+many columns as fit at 290 px, and each card, in order, goes into the shortest
+column so far. It re-runs after every render and when the width changes; while
+the list is hidden (the shared page's Plan tab) it waits until it is shown.
+
 ## How the checklist is stored
 
 It is not. `Support/ChecklistBuilder` recomputes every row from placements,
@@ -154,12 +159,24 @@ in `plan_undo` until the owner keeps or undoes the result.
 
 ## The secret link
 
-`/podplan/s/{token}` — three routes that drop the `auth` middleware
+`/podplan/s/{token}` — four routes that drop the `auth` middleware
 (`routes.php`). The 40-character token is the only credential. It can read
-one project's checklist and tick its rows; it cannot add items, answer open
-choices, reset, or reach any other URL. Replacing or stopping the share makes
-the old link a 404. Both the owner's page and the shared page poll every 5 s,
-so everyone sees everyone's ticks.
+one project's checklist and tick its rows, and look at its plan; it cannot add
+items, answer open choices, reset, change the plan, or reach any other URL.
+Replacing or stopping the share makes the old link a 404. Both the owner's
+page and the shared page poll every 5 s, so everyone sees everyone's ticks.
+
+The shared page has two tabs. **Plan** draws `s/{token}/plan`, which returns
+`PlanService::publicState()`: the canvas, cables, axis, warnings and, per
+placement, only what is drawn (`id, kind, symbol, role, label, sub, x, y, rot,
+fov, number, wireless, wireless_rx, across`). No inventory, item ids, titles
+or providers. It polls every 5 s while the tab is showing; `#plan` on the link
+opens that tab first.
+
+Both screens draw with `partials/plan-canvas.blade.php`:
+`ppCanvas(svg, {plan, edit, view})`. With `edit: false` nothing carries
+`data-id` or `data-axis`, so there is nothing to grab and a phone scrolls
+freely over the drawing. Change how something is drawn there, once.
 
 ## Look
 
@@ -189,6 +206,7 @@ own `config/app.php` version and `CHANGELOG.md` entry.
 - `Support/PlanService.php` — placements, default spots, layout snapshots, the Plan screen's state payload.
 - `Support/ChecklistService.php` — payload + ticking shared by owner and guests.
 - `Support/PlanDescriber.php` — the Claude call.
+- `resources/views/partials/plan-canvas.blade.php` — the plan's drawing code (symbols, cables, axis), shared by the Plan screen and the secret-link page; `plan-legend.blade.php` is the legend under it.
 - `resources/views/partials/styles.blade.php` — the module's styles in the hub's look, scoped to `body.ctx-podplan`.
 
 Tests: `tests/Feature/PodPlanTest.php` (run against the seeded inventory).

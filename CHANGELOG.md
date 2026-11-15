@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.14.0] - 2026-11-15
+
+### Added
+- **Change password** screen (`/account/password`, "Password" in the top bar). Asks for the current password, then the new one twice, and shows a confirmation when it is done. New passwords are at least 10 characters and must differ from the current one; attempts are limited to 6 a minute. Changing the password also retires any "remember me" cookie left on another device.
+
+### Note
+- There is still no "forgot password" by e-mail — this host has no mail. The change screen only works while signed in; a forgotten password is still a job for phpMyAdmin.
+
+## [1.13.0] - 2026-11-15
+
+### Added
+- PodPlan 1.2.0: the **secret link now shows the plan** as well. The shared page has two tabs, Checklist and Plan. The Plan tab is the same drawing as the owner's Plan screen — gear, camera numbers and lenses, cables, FOH, the axis of action and its warning — to look at only: nothing can be moved, turned, added or removed from it. It follows the owner's changes within a few seconds, has its own "Field of view" tick box, and adding `#plan` to the link opens it straight on the plan.
+- PodPlan: the checklist cards are laid out as **masonry** (on your Checklist screen and on the shared page). Cards stack in columns with no gaps under the short ones; the order still reads across the top, and each next card drops into the shortest column. One column on a phone.
+
+### Changed
+- PodPlan: the shared plan is sent with only what is drawn (positions, labels, numbers) — no inventory, no item details, no rental sources. Changing the plan still needs the login.
+- PodPlan: the plan's drawing code now lives in one place (`partials/plan-canvas`), used by both the Plan screen and the shared page.
+
 ## [1.12.0] - 2026-11-15
 
 ### Added

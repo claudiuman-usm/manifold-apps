@@ -7,7 +7,7 @@ return [
     'key' => 'podplan',
     // PodPlan's own version, shown in the module's navigation. Bump it with every
     // change to the module (and note the change in the hub's CHANGELOG.md).
-    'version' => '1.1.0',
+    'version' => '1.2.0',
     'order' => 40,
     'icon' => '',
     'color' => 'sky',

@@ -796,6 +796,50 @@ class PodPlanTest extends TestCase
 
     // ------------------------------------------------------------ inventory
 
+    public function test_the_secret_link_shows_the_plan_to_look_at_and_nothing_to_change(): void
+    {
+        $project = $this->project(['live_mixing' => true]);
+        $this->add($project, $this->item('Blackmagic Pocket Cinema Camera 4K #1'));
+        $state = $this->add($project, $this->item('Nanlite Forza 720', 'Marius Achiței'));
+        $this->patchJson(route('podplan.plan.axis', $project), ['on' => true])->assertOk();
+        $camera = collect($state['placements'])->firstWhere('role', 'camera')['id'];
+        $token = $this->postJson(route('podplan.checklist.share', $project))->assertOk()->json('share_url');
+        $token = basename($token);
+
+        auth()->logout();
+
+        // The page carries a Plan tab next to the checklist.
+        $this->get(route('podplan.share.show', $token))->assertOk()
+            ->assertSee('data-tab="plan"', false)->assertSee(__('podplan::messages.plan.top_down'));
+
+        // The plan itself: what is drawn, and nothing else about the gear or the inventory.
+        $plan = $this->getJson(route('podplan.share.plan', $token))->assertOk()->json();
+        $this->assertSame(['canvas', 'placements', 'cables', 'axis', 'plan_warnings'], array_keys($plan));
+        $drawn = collect($plan['placements']);
+        $this->assertSame(1, $drawn->firstWhere('role', 'camera')['number']);
+        $this->assertNotNull($drawn->firstWhere('role', 'light'));
+        $this->assertTrue($plan['axis']['on']);
+        foreach ($drawn as $placement) {
+            $this->assertSame([], array_diff(array_keys($placement), [
+                'id', 'kind', 'symbol', 'role', 'label', 'sub', 'x', 'y', 'rot', 'fov', 'number', 'wireless', 'wireless_rx', 'across',
+            ]));
+        }
+        $this->assertStringNotContainsString('Marius', json_encode($plan));
+
+        // A guest can look, not touch: every way of changing the plan still needs the login.
+        $this->patchJson(route('podplan.plan.move', [$project, $camera]), ['x' => 10, 'y' => 10])->assertRedirect(route('login'));
+        $this->patchJson(route('podplan.plan.axis', $project), ['on' => false])->assertRedirect(route('login'));
+        $this->deleteJson(route('podplan.plan.remove', [$project, $camera]))->assertRedirect(route('login'));
+        $this->getJson(route('podplan.plan.state', $project))->assertRedirect(route('login'));
+
+        // A wrong or revoked link shows no plan.
+        $this->getJson(route('podplan.share.plan', str_repeat('x', 40)))->assertNotFound();
+        $this->actingAs($this->user);
+        $this->deleteJson(route('podplan.checklist.unshare', $project))->assertOk();
+        auth()->logout();
+        $this->getJson(route('podplan.share.plan', $token))->assertNotFound();
+    }
+
     public function test_item_rules_can_be_overridden_reset_and_applied_to_the_type(): void
     {
         $light = $this->item('Nanlite Forza 500');

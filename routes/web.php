@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeployController;
 use App\Http\Controllers\IconController;
@@ -35,6 +36,14 @@ Route::middleware('guest')->group(function () {
 Route::post('logout', [LoginController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
+
+// Change password (single user, no e-mail on this host, so no reset flow).
+Route::middleware('auth')->group(function () {
+    Route::get('account/password', [PasswordController::class, 'edit'])->name('password.edit');
+    Route::put('account/password', [PasswordController::class, 'update'])
+        ->middleware('throttle:6,1')
+        ->name('password.update');
+});
 
 // Hub.
 Route::middleware('auth')->group(function () {

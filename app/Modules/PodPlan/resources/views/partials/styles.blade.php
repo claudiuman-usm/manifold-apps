@@ -160,6 +160,7 @@ body.ctx-podplan .content { padding-top: 28px; }
 .pp-stepper { display: inline-flex; align-items: center; border-radius: 999px; border: 1px solid var(--stroke); background: var(--field); }
 .pp-stepper button { width: 32px; height: 32px; border: 0; border-radius: 50%; background: transparent; color: var(--text); font: inherit; font-size: 1rem; cursor: pointer; }
 .pp-angle { min-width: 38px; text-align: center; font-size: .84rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pp-shareplan { flex: none; max-width: 800px; margin: 0 auto; }
 .pp-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 0 8px; color: var(--text-2); font-size: .8rem; }
 .pp-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .pp-legend i { display: inline-block; }
@@ -179,7 +180,9 @@ body.ctx-podplan .content { padding-top: 28px; }
 .pp-cl { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 18px; }
 .pp-cl-main { flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 .pp-cl-side { flex: 1 1 260px; max-width: 320px; min-width: 250px; display: flex; flex-direction: column; gap: 14px; }
-.pp-cl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; align-items: start; }
+.pp-cl-grid { display: flex; align-items: flex-start; gap: 14px; }
+.pp-cl-grid > .pp-card { flex: 1 1 auto; }
+.pp-cl-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 .pp-cl-grid .pp-card { padding: 14px 18px 6px; }
 .pp-cardhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-bottom: 4px; }
 .pp-cardhead h2 { font-size: .97rem; font-weight: 600; letter-spacing: -.01em; }
