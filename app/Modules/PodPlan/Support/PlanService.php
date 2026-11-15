@@ -145,6 +145,8 @@ class PlanService
             'x' => $this->clampX($x ?? $sx),
             'y' => $this->clampY($y ?? $sy),
             'rotation' => $rotation ?? $srot,
+            // Every camera on a plan is numbered: the lowest number not in use.
+            'number' => $item->type->role === 'camera' ? $this->nextNumber($project) : null,
             'sort' => (int) $project->placements()->max('sort') + 1,
         ]);
 
@@ -275,6 +277,125 @@ class PlanService
         $placement->save();
     }
 
+    /** The lowest camera number this project is not using yet. */
+    protected function nextNumber(Project $project): int
+    {
+        $used = $project->placements()->whereNotNull('number')->pluck('number')->all();
+        for ($n = 1; in_array($n, $used, true); $n++);
+
+        return $n;
+    }
+
+    /**
+     * Give a camera a number (or none). Numbers are unique on a plan, so
+     * taking one another camera has swaps the two.
+     */
+    public function setNumber(Placement $placement, ?int $number): void
+    {
+        if ($number !== null) {
+            $holder = Placement::where('project_id', $placement->project_id)
+                ->where('number', $number)->where('id', '!=', $placement->id)->first();
+            $holder?->update(['number' => $placement->number]);
+        }
+
+        $placement->update(['number' => $number]);
+    }
+
+    // ----------------------------------------------------------------- axis
+
+    /**
+     * Show, hide or move the axis of action (the 180-degree line). Turning it
+     * on for the first time lays it through the two people on set.
+     *
+     * @param  array{x1?:float,y1?:float,x2?:float,y2?:float}  $points
+     */
+    public function setAxis(Project $project, bool $on, array $points = [], bool $reset = false): void
+    {
+        $axis = (array) $project->axis;
+
+        if (isset($points['x1'], $points['y1'], $points['x2'], $points['y2'])) {
+            $axis = [
+                'x1' => max(0, min(self::W, round((float) $points['x1'], 1))),
+                'y1' => max(0, min(self::H, round((float) $points['y1'], 1))),
+                'x2' => max(0, min(self::W, round((float) $points['x2'], 1))),
+                'y2' => max(0, min(self::H, round((float) $points['y2'], 1))),
+            ];
+        } elseif ($reset || ! isset($axis['x1'])) {
+            $axis = $this->defaultAxis($project);
+        }
+
+        $project->update(['axis' => ['on' => $on] + array_intersect_key($axis, array_flip(['x1', 'y1', 'x2', 'y2']))]);
+    }
+
+    /** Through the first two people, reaching a little past each; level through the table otherwise. */
+    protected function defaultAxis(Project $project): array
+    {
+        $people = $project->placements()->where('kind', 'person')->orderBy('sort')->orderBy('id')->take(2)->get();
+        [$pw] = self::SIZES['person'];
+
+        if ($people->count() === 2) {
+            [$ax, $ay] = [$people[0]->x + $pw / 2, $people[0]->y + $pw / 2];
+            [$bx, $by] = [$people[1]->x + $pw / 2, $people[1]->y + $pw / 2];
+            $length = hypot($bx - $ax, $by - $ay) ?: 1;
+            [$ux, $uy] = [($bx - $ax) / $length, ($by - $ay) / $length];
+            $reach = 80;
+
+            return [
+                'x1' => max(0, min(self::W, round($ax - $ux * $reach, 1))), 'y1' => max(0, min(self::H, round($ay - $uy * $reach, 1))),
+                'x2' => max(0, min(self::W, round($bx + $ux * $reach, 1))), 'y2' => max(0, min(self::H, round($by + $uy * $reach, 1))),
+            ];
+        }
+
+        [$tw, $th] = self::SIZES['table'];
+        $y = self::TABLE[1] + $th / 2;
+
+        return ['x1' => self::TABLE[0] - 120.0, 'y1' => $y, 'x2' => self::TABLE[0] + $tw + 120.0, 'y2' => $y];
+    }
+
+    /**
+     * Cameras on the wrong side of the axis. The working side is where most
+     * cameras are; on a tie it is the side of the lowest-numbered camera.
+     *
+     * @param  list<array<string,mixed>>  $placements
+     * @return array<int,bool> placement id => true
+     */
+    protected function acrossTheAxis(?array $axis, array $placements): array
+    {
+        if (empty($axis['on']) || ! isset($axis['x1'])) {
+            return [];
+        }
+
+        [$cw, $ch] = self::SIZES['cam'];
+        $sides = [];
+        foreach ($placements as $p) {
+            if ($p['role'] !== 'camera') {
+                continue;
+            }
+            $cross = ($axis['x2'] - $axis['x1']) * ($p['y'] + $ch / 2 - $axis['y1'])
+                - ($axis['y2'] - $axis['y1']) * ($p['x'] + $cw / 2 - $axis['x1']);
+            // A camera sitting on the line itself is on neither side.
+            if (abs($cross) > 1) {
+                $sides[$p['id']] = ['side' => $cross > 0 ? 1 : -1, 'number' => $p['number'] ?? PHP_INT_MAX];
+            }
+        }
+
+        $count = array_count_values(array_column($sides, 'side'));
+        $one = $count[1] ?? 0;
+        $other = $count[-1] ?? 0;
+        if (! $one || ! $other) {
+            return [];
+        }
+
+        if ($one !== $other) {
+            $working = $one > $other ? 1 : -1;
+        } else {
+            uasort($sides, fn ($a, $b) => $a['number'] <=> $b['number']);
+            $working = reset($sides)['side'];
+        }
+
+        return array_map(fn () => true, array_filter($sides, fn ($s) => $s['side'] !== $working));
+    }
+
     /** Set the field of view by hand, or pass null to go back to automatic. */
     public function setFov(Placement $placement, ?float $fov): void
     {
@@ -324,7 +445,7 @@ class PlanService
         return [
             'placements' => $placements->map(fn (Placement $p) => [
                 'kind' => $p->kind, 'gear_item_id' => $p->gear_item_id, 'label' => $p->label,
-                'x' => $p->x, 'y' => $p->y, 'rotation' => $p->rotation, 'fov' => $p->fov,
+                'x' => $p->x, 'y' => $p->y, 'rotation' => $p->rotation, 'fov' => $p->fov, 'number' => $p->number,
             ])->all(),
             'answers' => $project->answers()->get()->map(fn (Answer $a) => [
                 'item' => $itemOf[$a->placement_id] ?? null, 'question' => $a->question,
@@ -379,6 +500,10 @@ class PlanService
                 $placement = $this->addGear($project, $item, $x, $y, $rot);
                 if ($placement && isset($entry['fov'])) {
                     $this->setFov($placement, (float) $entry['fov']);
+                }
+                // An undo puts back the numbers the cameras had, "none" included.
+                if ($placement && array_key_exists('number', $entry)) {
+                    $this->setNumber($placement, $entry['number'] === null ? null : (int) $entry['number']);
                 }
                 if ($placement && $i === 0) {
                     foreach ($answers as $answer) {
@@ -513,6 +638,7 @@ class PlanService
                     default => Optics::LIGHT_FOV,
                 },
                 'fov_manual' => $p->fov !== null,
+                'number' => $p->number,
                 'sub' => $subs[$p->id] ?? null,
                 'wireless' => isset($wireless[$p->id]),
                 'symbol' => $p->kind === 'gear' ? ($type->symbol ?: 'box') : ($p->kind === 'person' ? 'person' : 'table'),
@@ -535,8 +661,14 @@ class PlanService
                 <=> (($b['x'] - $p['x']) ** 2 + ($b['y'] - $p['y']) ** 2));
             $receivers[$mixers[0]['id']] = true;
         }
+        $across = $this->acrossTheAxis($project->axis, $out);
+        $planWarnings = [];
         foreach ($out as $i => $p) {
             $out[$i]['wireless_rx'] = isset($receivers[$p['id']]);
+            $out[$i]['across'] = isset($across[$p['id']]);
+            if (isset($across[$p['id']])) {
+                $planWarnings[] = ['type' => 'axis', 'number' => $p['number'], 'label' => $p['label']];
+            }
         }
 
         return [
@@ -549,6 +681,8 @@ class PlanService
             'canvas' => ['w' => self::W, 'h' => self::H, 'sizes' => self::SIZES, 'zone' => self::MIXER_ZONE],
             'placements' => $out,
             'cables' => $this->cables($project, $out),
+            'axis' => $project->axis,
+            'plan_warnings' => $planWarnings,
             'gear' => $this->gearGroups($placements, $double),
             'checklist' => $checklist,
             'ai' => $project->ai_result,

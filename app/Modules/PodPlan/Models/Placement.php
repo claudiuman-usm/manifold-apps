@@ -9,9 +9,9 @@ class Placement extends Model
 {
     protected $table = 'podplan_placements';
 
-    protected $fillable = ['project_id', 'kind', 'gear_item_id', 'label', 'x', 'y', 'rotation', 'fov', 'sort'];
+    protected $fillable = ['project_id', 'kind', 'gear_item_id', 'label', 'x', 'y', 'rotation', 'fov', 'number', 'sort'];
 
-    protected $casts = ['x' => 'float', 'y' => 'float', 'rotation' => 'float', 'fov' => 'float'];
+    protected $casts = ['x' => 'float', 'y' => 'float', 'rotation' => 'float', 'fov' => 'float', 'number' => 'integer'];
 
     public function project(): BelongsTo
     {

@@ -62,6 +62,7 @@ class PlanController extends Controller
             'rotation' => ['nullable', 'numeric'],
             'fov' => ['nullable', 'numeric', 'min:5', 'max:160'],
             'fov_auto' => ['nullable', 'boolean'],
+            'number' => ['nullable', 'integer', 'min:1', 'max:99'],
         ]);
 
         // Cameras and lights point somewhere; everything else stays square to the canvas.
@@ -73,6 +74,11 @@ class PlanController extends Controller
             isset($data['y']) ? (float) $data['y'] : null,
             isset($data['rotation']) && $aims ? (float) $data['rotation'] : null,
         );
+
+        // "number" present but empty means: take the number off.
+        if ($request->exists('number') && $placement->item?->type->role === 'camera') {
+            $this->plan->setNumber($placement, isset($data['number']) ? (int) $data['number'] : null);
+        }
 
         if ($aims && $request->boolean('fov_auto')) {
             $this->plan->setFov($placement, null);
@@ -97,6 +103,24 @@ class PlanController extends Controller
     {
         $data = $request->validate(['live' => ['required', 'boolean']]);
         $project->update(['live_mixing' => (bool) $data['live']]);
+
+        return $this->state($project);
+    }
+
+    /** Show, hide or move the axis of action. */
+    public function axis(Request $request, Project $project): JsonResponse
+    {
+        $data = $request->validate([
+            'on' => ['required', 'boolean'],
+            'x1' => ['nullable', 'numeric'], 'y1' => ['nullable', 'numeric'],
+            'x2' => ['nullable', 'numeric'], 'y2' => ['nullable', 'numeric'],
+            'reset' => ['nullable', 'boolean'],
+        ]);
+
+        $this->plan->setAxis($project, (bool) $data['on'], array_filter(
+            array_intersect_key($data, array_flip(['x1', 'y1', 'x2', 'y2'])),
+            fn ($v) => $v !== null,
+        ), $request->boolean('reset'));
 
         return $this->state($project);
     }

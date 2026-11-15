@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 The displayed version lives in `config/app.php` (`version`) and is shown in the app footer.
 
+## [1.12.0] - 2026-11-15
+
+### Added
+- PodPlan 1.1.0: the **axis of action** (the 180° rule) on the plan. An "Axis" tick box next to "Field of view" shows a line that starts through the two people on set. Drag the line to move it, drag either end to turn it; with the line selected the toolbar turns it in 5° steps or puts it back through the people. The line and whether it is shown are saved with the project.
+- PodPlan: a camera on the **wrong side of the axis** is ringed in red and named in a warning under the plan. The working side is where most cameras are; with one camera each side, the lowest-numbered camera decides.
+- PodPlan: **camera numbers**. Every camera is numbered as it is placed (the lowest free number) and the number is drawn on the camera. Change it from the toolbar when the camera is selected — taking a number another camera has swaps the two — or take it off. Numbers are for the plan only and do not appear on the checklist.
+
+### Changed
+- PodPlan: on a numbered camera the **wireless mark** moves to the top-right corner of the camera, like a notification badge; a camera without a number keeps it in the middle.
+
+### Database
+- New migration `2026_11_15_000006`: `axis` on `podplan_projects`, `number` on `podplan_placements`; cameras already on a plan are numbered in the order they were placed. Run `/_deploy/migrate` after deploying.
+
 ## [1.11.0] - 2026-11-15
 
 ### Added

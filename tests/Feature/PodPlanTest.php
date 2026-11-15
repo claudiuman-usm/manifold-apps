@@ -609,6 +609,100 @@ class PodPlanTest extends TestCase
         $this->assertSame(30, (int) $placed['rot']);
     }
 
+    public function test_cameras_are_numbered_and_numbers_can_be_swapped_or_removed(): void
+    {
+        $project = $this->project();
+        $this->add($project, $this->item('Blackmagic Pocket Cinema Camera 4K #1'));
+        $this->add($project, $this->item('Blackmagic Pocket Cinema Camera 4K #2'));
+        $state = $this->add($project, $this->item('Nanlite Forza 500'));
+
+        $cameras = collect($state['placements'])->where('role', 'camera')->values();
+        $this->assertSame([1, 2], $cameras->pluck('number')->all());
+        $this->assertNull(collect($state['placements'])->firstWhere('role', 'light')['number']);
+        [$first, $second] = [$cameras[0]['id'], $cameras[1]['id']];
+        $number = fn (array $state, int $id) => collect($state['placements'])->firstWhere('id', $id)['number'];
+
+        // Taking a number that is in use swaps the two cameras.
+        $state = $this->patchJson(route('podplan.plan.move', [$project, $first]), ['number' => 2])->assertOk()->json();
+        $this->assertSame(2, $number($state, $first));
+        $this->assertSame(1, $number($state, $second));
+
+        // A free number is simply taken, and a number can be taken off.
+        $state = $this->patchJson(route('podplan.plan.move', [$project, $first]), ['number' => 5])->assertOk()->json();
+        $this->assertSame(5, $number($state, $first));
+        $state = $this->patchJson(route('podplan.plan.move', [$project, $second]), ['number' => null])->assertOk()->json();
+        $this->assertNull($number($state, $second));
+
+        // Moving a camera leaves its number alone; the next camera gets the lowest free one.
+        $state = $this->patchJson(route('podplan.plan.move', [$project, $first]), ['x' => 40, 'y' => 40])->assertOk()->json();
+        $this->assertSame(5, $number($state, $first));
+        $state = $this->add($project, $this->item('Blackmagic Pocket Cinema Camera 4K #3'));
+        $this->assertSame([5, null, 1], collect($state['placements'])->where('role', 'camera')->pluck('number')->all());
+
+        // Numbers are for the plan only: nothing on the checklist mentions them.
+        $this->assertStringNotContainsString('"number"', json_encode($state['checklist']));
+
+        // Only cameras take a number.
+        $light = collect($state['placements'])->firstWhere('role', 'light')['id'];
+        $state = $this->patchJson(route('podplan.plan.move', [$project, $light]), ['number' => 3])->assertOk()->json();
+        $this->assertNull($number($state, $light));
+    }
+
+    public function test_the_axis_of_action_can_be_shown_moved_and_flags_a_camera_across_it(): void
+    {
+        $project = $this->project();
+        $this->add($project, $this->item('Blackmagic Pocket Cinema Camera 4K #1'));
+        $this->add($project, $this->item('Blackmagic Pocket Cinema Camera 4K #2'));
+        $state = $this->add($project, $this->item('Blackmagic Pocket Cinema Camera 4K #3'));
+        $this->assertNull($state['axis']);
+        $cameras = collect($state['placements'])->where('role', 'camera')->pluck('id')->all();
+
+        // Turned on for the first time, it runs through the two people and beyond them.
+        $state = $this->patchJson(route('podplan.plan.axis', $project), ['on' => true])->assertOk()->json();
+        $people = collect($state['placements'])->where('kind', 'person')->values();
+        $axis = $state['axis'];
+        $this->assertTrue($axis['on']);
+        foreach ($people as $person) {
+            $cross = ($axis['x2'] - $axis['x1']) * ($person['y'] + 16 - $axis['y1']) - ($axis['y2'] - $axis['y1']) * ($person['x'] + 16 - $axis['x1']);
+            $this->assertEqualsWithDelta(0, $cross / hypot($axis['x2'] - $axis['x1'], $axis['y2'] - $axis['y1']), 0.5);
+        }
+        $this->assertGreaterThan(
+            hypot($people[1]['x'] - $people[0]['x'], $people[1]['y'] - $people[0]['y']),
+            hypot($axis['x2'] - $axis['x1'], $axis['y2'] - $axis['y1']),
+        );
+
+        // Placed level across the set: the three cameras all sit below it, so nothing is flagged.
+        $line = ['on' => true, 'x1' => 100, 'y1' => 235, 'x2' => 560, 'y2' => 235];
+        $state = $this->patchJson(route('podplan.plan.axis', $project), $line)->assertOk()->json();
+        $this->assertSame(235, (int) $state['axis']['y1']);
+        $this->assertSame([], $state['plan_warnings']);
+
+        // One camera goes round to the far side: it is flagged, the other two are not.
+        $state = $this->patchJson(route('podplan.plan.move', [$project, $cameras[2]]), ['x' => 300, 'y' => 60])->assertOk()->json();
+        $across = collect($state['placements'])->where('across', true)->pluck('id')->all();
+        $this->assertSame([$cameras[2]], $across);
+        $this->assertSame([['type' => 'axis', 'number' => 3]], array_map(fn ($w) => ['type' => $w['type'], 'number' => $w['number']], $state['plan_warnings']));
+
+        // One camera each side: the lowest number sets the working side.
+        $this->deleteJson(route('podplan.plan.remove', [$project, $cameras[1]]))->assertOk();
+        $state = $this->state($project);
+        $this->assertSame([$cameras[2]], collect($state['placements'])->where('across', true)->pluck('id')->all());
+
+        // Hidden, the line keeps its place but flags nothing; shown again it is where it was left.
+        $state = $this->patchJson(route('podplan.plan.axis', $project), ['on' => false])->assertOk()->json();
+        $this->assertFalse($state['axis']['on']);
+        $this->assertSame([], $state['plan_warnings']);
+        $state = $this->patchJson(route('podplan.plan.axis', $project), ['on' => true])->assertOk()->json();
+        $this->assertSame(235, (int) $state['axis']['y2']);
+        $this->assertCount(1, $state['plan_warnings']);
+
+        // It can be put back through the people, and never leaves the canvas.
+        $state = $this->patchJson(route('podplan.plan.axis', $project), ['on' => true, 'reset' => true])->assertOk()->json();
+        $this->assertEquals($axis, $state['axis']);
+        $state = $this->patchJson(route('podplan.plan.axis', $project), ['on' => true, 'x1' => -50, 'y1' => 10, 'x2' => 9000, 'y2' => 900])->assertOk()->json();
+        $this->assertSame([0, 10, 660, 560], array_map('intval', [$state['axis']['x1'], $state['axis']['y1'], $state['axis']['x2'], $state['axis']['y2']]));
+    }
+
     public function test_the_same_gear_on_two_shoots_that_day_is_flagged(): void
     {
         $camera = $this->item('Blackmagic Studio Camera 4K Pro');

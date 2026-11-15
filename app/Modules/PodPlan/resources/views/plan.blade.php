@@ -33,17 +33,23 @@
             <div class="pp-card pp-stagecard">
                 <div class="pp-row pp-between">
                     <h2>{{ __('podplan::messages.plan.top_down') }}</h2>
-                    <label class="pp-toggle"><input type="checkbox" id="pp-fov" checked>{{ __('podplan::messages.plan.fov') }}</label>
+                    <div class="pp-row" style="gap:6px 16px;">
+                        <label class="pp-toggle"><input type="checkbox" id="pp-fov" checked>{{ __('podplan::messages.plan.fov') }}</label>
+                        <label class="pp-toggle" title="{{ __('podplan::messages.plan.legend_axis') }}"><input type="checkbox" id="pp-axis-on">{{ __('podplan::messages.plan.axis') }}</label>
+                    </div>
                 </div>
                 <div class="pp-canvas">
                     <svg id="pp-svg" viewBox="0 0 {{ $state['canvas']['w'] }} {{ $state['canvas']['h'] }}" role="img"
                          aria-label="{{ __('podplan::messages.plan.top_down') }}">
                         <g id="pp-zone"></g>
                         <g id="pp-cables"></g>
+                        <g id="pp-axis-grab"></g>
                         <g id="pp-symbols"></g>
+                        <g id="pp-axis"></g>
                     </svg>
                 </div>
             </div>
+            <div id="pp-planwarn" hidden></div>
             <div class="pp-toolbar" id="pp-toolbar"></div>
             <div class="pp-legend">
                 <span><i style="width:14px;height:10px;border-radius:2px;background:var(--pp-accent);"></i>{{ __('podplan::messages.plan.legend_camera') }}</span>
@@ -51,6 +57,7 @@
                 <span><i style="width:18px;border-top:2px dashed var(--pp-live);"></i>{{ __('podplan::messages.plan.legend_hdmi') }}</span>
                 <span><i style="width:18px;border-top:2px solid var(--pp-ok);"></i>{{ __('podplan::messages.plan.legend_xlr') }}</span>
                 <span><svg width="18" height="13" viewBox="0 0 18 13" aria-hidden="true"><circle cx="9" cy="10.7" r="1.7" style="fill:var(--pp-muted)"/><path d="M5 7.7 A5.6 5.6 0 0 1 13 7.7" style="fill:none;stroke:var(--pp-muted);stroke-width:1.8;stroke-linecap:round"/><path d="M1.6 4.3 A10.4 10.4 0 0 1 16.4 4.3" style="fill:none;stroke:var(--pp-muted);stroke-width:1.8;stroke-linecap:round"/></svg>{{ __('podplan::messages.plan.legend_wireless') }}</span>
+                <span><i style="width:20px;border-top:2px dashed var(--pp-axis);"></i>{{ __('podplan::messages.plan.legend_axis') }}</span>
             </div>
         </section>
 
@@ -81,6 +88,7 @@
     var URLS = {
         placements: @json(route('podplan.plan.add', $project)),
         live: @json(route('podplan.plan.live', $project)),
+        axis: @json(route('podplan.plan.axis', $project)),
         answers: @json(route('podplan.plan.answer', $project)),
         describe: @json(route('podplan.plan.describe', $project)),
         keep: @json(route('podplan.plan.keep', $project)),
@@ -92,6 +100,7 @@
 
     var state = @json($state);
     var selected = null;
+    var axisSel = false;
     var mode = (AI && /[?&]mode=describe/.test(location.search)) ? 'describe' : 'gear';
     var busy = false;
     var describeError = @json(session('pp_error'));
@@ -110,6 +119,8 @@
     var svg = document.getElementById('pp-svg');
     var gCables = document.getElementById('pp-cables');
     var gSymbols = document.getElementById('pp-symbols');
+    var gAxis = document.getElementById('pp-axis');
+    var gAxisGrab = document.getElementById('pp-axis-grab');
     var side = document.getElementById('pp-side');
     var preview = document.getElementById('pp-preview');
     var toolbar = document.getElementById('pp-toolbar');
@@ -140,6 +151,7 @@
         }).then(function (s) {
             state = s;
             if (selected && !find(selected)) selected = null;
+            if (!axisOn()) axisSel = false;
             render();
             return s;
         });
@@ -156,6 +168,13 @@
             '<path d="M' + (cx - 7.4) + ' ' + (cy - 2.2) + ' A10.4 10.4 0 0 1 ' + (cx + 7.4) + ' ' + (cy - 2.2) + '" style="' + st + '"/></g>';
     }
 
+    // With a number on the camera body the wireless mark moves to its corner, like a notification dot.
+    function badge(cx, cy) {
+        var k = narrow.matches ? 1.3 : 1;
+        return '<g pointer-events="none"><circle cx="' + cx + '" cy="' + cy + '" r="' + (8.5 * k) + '" style="fill:var(--pp-surface);stroke:var(--pp-accent);stroke-width:1.5"/>' +
+            '<g transform="translate(' + cx + ',' + (cy - 0.4 * k) + ') scale(' + (0.62 * k) + ')">' + waves(0, 0, 'var(--pp-accent-ink)') + '</g></g>';
+    }
+
     function symbol(p) {
         var rot = p.rot || 0;
         switch (p.symbol) {
@@ -164,9 +183,12 @@
                 var half = 118 * Math.tan(((p.fov || 52) / 2) * Math.PI / 180);
                 return '<g transform="rotate(' + rot + ' 20 14)">' +
                     (fovOn ? '<polygon points="20,2 ' + (20 - half).toFixed(1) + ',-116 ' + (20 + half).toFixed(1) + ',-116" pointer-events="none" style="fill:var(--pp-accent);fill-opacity:.14"/>' : '') +
+                    // A camera that crossed the axis of action is ringed in red.
+                    (p.across ? '<rect x="-5" y="-10" width="50" height="43" rx="10" pointer-events="none" style="fill:none;stroke:var(--pp-bad);stroke-width:2.5"/>' : '') +
                     '<rect width="40" height="28" rx="6" style="fill:var(--pp-accent)"/>' +
                     '<rect x="14" y="-6" width="12" height="8" rx="2" style="fill:var(--pp-accent-ink)"/></g>' +
-                    (p.wireless ? waves(20, 13, 'var(--accent-ink)') : '');
+                    (p.number != null ? '<text class="num" x="20" y="' + (14 + numSize() * 0.36) + '" text-anchor="middle" style="font-size:' + numSize() + 'px">' + p.number + '</text>' : '') +
+                    (p.wireless ? (p.number != null ? badge(39, 0) : waves(20, 13, 'var(--accent-ink)')) : '');
             case 'mic':
                 return '<circle cx="8" cy="8" r="6" style="fill:var(--pp-surface);stroke:var(--pp-ink);stroke-width:4"/>';
             case 'wireless':
@@ -189,6 +211,8 @@
                     (p.wireless_rx ? waves(size(p)[0] / 2, size(p)[1] / 2 - 1, 'var(--pp-on-box)') : '');
         }
     }
+
+    function numSize() { return narrow.matches ? 19 : 15; }
 
     function renderSymbols() {
         var rank = {furniture: 0, person: 1, gear: 2};
@@ -221,6 +245,86 @@
         });
         gSymbols.innerHTML = h;
         renderCables();
+        renderAxis();
+    }
+
+    // ------------------------------------------------------------------ axis
+
+    function axisOn() { return !!(state.axis && state.axis.on && state.axis.x1 != null); }
+
+    // The rule holds for the whole room, so the line is carried on, faintly, to the edges of the canvas.
+    function axisReach(a) {
+        var dx = a.x2 - a.x1, dy = a.y2 - a.y1, lo = -1e6, hi = 1e6;
+        [[a.x1, dx, W], [a.y1, dy, H]].forEach(function (c) {
+            if (Math.abs(c[1]) < 0.001) return;
+            var t1 = -c[0] / c[1], t2 = (c[2] - c[0]) / c[1];
+            lo = Math.max(lo, Math.min(t1, t2));
+            hi = Math.min(hi, Math.max(t1, t2));
+        });
+        return [a.x1 + dx * lo, a.y1 + dy * lo, a.x1 + dx * hi, a.y1 + dy * hi];
+    }
+
+    /*
+     * The line itself is drawn over everything, but it is grabbed from under
+     * the gear: people and microphones sit right on it and must stay easy to
+     * pick up. Its two end handles are on top, clear of the set.
+     */
+    function renderAxis() {
+        if (!axisOn()) { gAxis.innerHTML = gAxisGrab.innerHTML = ''; return; }
+        var a = state.axis, r = axisReach(a), k = LS(), big = narrow.matches;
+        var line = function (p, attrs) {
+            return '<line x1="' + p[0].toFixed(1) + '" y1="' + p[1].toFixed(1) + '" x2="' + p[2].toFixed(1) + '" y2="' + p[3].toFixed(1) + '" ' + attrs + '/>';
+        };
+        var seg = [a.x1, a.y1, a.x2, a.y2];
+        gAxisGrab.innerHTML = line(seg, 'data-axis="move" pointer-events="stroke" style="stroke:transparent;stroke-width:' + (big ? 46 : 24) + '"');
+
+        var h = line(r, 'pointer-events="none" style="stroke:var(--pp-axis);stroke-opacity:.4;stroke-width:1.5;stroke-dasharray:2 6"') +
+                line(seg, 'pointer-events="none" style="stroke:var(--pp-axis);stroke-width:' + (axisSel ? 3.6 : 2.6) + ';stroke-dasharray:14 5 2 5;stroke-linecap:round"');
+        [['a', a.x1, a.y1], ['b', a.x2, a.y2]].forEach(function (e) {
+            h += '<g data-axis="' + e[0] + '"><circle cx="' + e[1] + '" cy="' + e[2] + '" r="' + (big ? 26 : 15) + '" fill="transparent"/>' +
+                 '<circle cx="' + e[1] + '" cy="' + e[2] + '" r="' + (big ? 9 : 6.5) + '" style="fill:var(--pp-surface);stroke:var(--pp-axis);stroke-width:' + (axisSel ? 3.4 : 2.6) + '"/></g>';
+        });
+        // Named at whichever end sits higher, where there is usually room.
+        var top = a.y1 <= a.y2 ? [a.x1, a.y1] : [a.x2, a.y2];
+        h += '<text class="axis" style="font-size:' + (10.5 * k) + 'px" text-anchor="middle" x="' + clamp(top[0], 24 * k, W - 24 * k) + '" y="' +
+             Math.max(top[1] - 12 * k, 11 * k) + '">180°</text>';
+        gAxis.innerHTML = h;
+    }
+
+    function selectAxis(on) {
+        axisSel = on;
+        selected = null;
+        renderSymbols();
+        renderToolbar();
+        if (mode === 'gear' && document.getElementById('pp-gear-list')) renderGearList();
+    }
+
+    function saveAxis() {
+        var a = state.axis, r = function (v) { return Math.round(v * 10) / 10; };
+        api('PATCH', URLS.axis, {on: true, x1: r(a.x1), y1: r(a.y1), x2: r(a.x2), y2: r(a.y2)});
+    }
+
+    // Turned about its middle. Near an edge it gets shorter rather than leave the canvas.
+    function turnAxis(deg) {
+        var a = state.axis, cx = (a.x1 + a.x2) / 2, cy = (a.y1 + a.y2) / 2;
+        var half = Math.hypot(a.x2 - a.x1, a.y2 - a.y1) / 2;
+        var ang = Math.atan2(a.y2 - a.y1, a.x2 - a.x1) + deg * Math.PI / 180;
+        var ux = Math.cos(ang), uy = Math.sin(ang);
+        if (Math.abs(ux) > 0.001) half = Math.min(half, Math.min(cx, W - cx) / Math.abs(ux));
+        if (Math.abs(uy) > 0.001) half = Math.min(half, Math.min(cy, H - cy) / Math.abs(uy));
+        a.x1 = cx - ux * half; a.y1 = cy - uy * half;
+        a.x2 = cx + ux * half; a.y2 = cy + uy * half;
+        saveAxis();
+    }
+
+    function renderWarn() {
+        var box = document.getElementById('pp-planwarn');
+        var list = state.plan_warnings || [];
+        box.hidden = !list.length;
+        box.innerHTML = list.map(function (w) {
+            var name = w.number != null ? T.plan.cam + ' ' + w.number : w.label;
+            return '<div class="pp-notice pp-notice--bad">' + esc(fmt(T.plan.axis_cross, {name: name})) + '</div>';
+        }).join('');
     }
 
     // FOH, the mixer corner: where mixers land by default and where every cable ends up.
@@ -294,6 +398,16 @@
 
     var drag = null;
     svg.addEventListener('pointerdown', function (e) {
+        var ax = e.target.closest('[data-axis]');
+        if (ax && axisOn()) {
+            var at = toSvg(e), a = state.axis;
+            drag = {axis: ax.getAttribute('data-axis'), px: at.x, py: at.y, from: {x1: a.x1, y1: a.y1, x2: a.x2, y2: a.y2},
+                    sx: e.clientX, sy: e.clientY, moved: false, pid: e.pointerId};
+            // Captured on the canvas itself: the line is redrawn while it moves.
+            try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+            e.preventDefault();
+            return;
+        }
         var g = e.target.closest('[data-id]');
         if (!g) { select(null); return; }
         var p = find(+g.getAttribute('data-id'));
@@ -305,6 +419,24 @@
     svg.addEventListener('pointermove', function (e) {
         if (!drag || e.pointerId !== drag.pid) return;
         if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 5) return;
+        if (drag.axis) {
+            var at = toSvg(e), f = drag.from, a = state.axis;
+            if (drag.axis === 'move') {
+                var mx = clamp(at.x - drag.px, -Math.min(f.x1, f.x2), W - Math.max(f.x1, f.x2));
+                var my = clamp(at.y - drag.py, -Math.min(f.y1, f.y2), H - Math.max(f.y1, f.y2));
+                a.x1 = f.x1 + mx; a.y1 = f.y1 + my; a.x2 = f.x2 + mx; a.y2 = f.y2 + my;
+            } else {
+                // An end follows the finger and the other end stays put, which turns the line.
+                var nx = clamp(at.x, 0, W), ny = clamp(at.y, 0, H), far = drag.axis === 'a' ? [f.x2, f.y2] : [f.x1, f.y1];
+                if (Math.hypot(nx - far[0], ny - far[1]) >= 60) {
+                    if (drag.axis === 'a') { a.x1 = nx; a.y1 = ny; } else { a.x2 = nx; a.y2 = ny; }
+                }
+            }
+            drag.moved = true;
+            renderAxis();
+            e.preventDefault();
+            return;
+        }
         var p = find(drag.id);
         if (!p) return;
         drag.moved = true;
@@ -318,8 +450,14 @@
     });
     function endDrag(e) {
         if (!drag || e.pointerId !== drag.pid) return;
-        var d = drag, p = find(d.id);
+        var d = drag;
         drag = null;
+        if (d.axis) {
+            if (d.moved) { axisSel = true; selected = null; saveAxis(); }
+            else selectAxis(!axisSel);
+            return;
+        }
+        var p = find(d.id);
         d.el.classList.remove('is-drag');
         if (!p) return;
         if (d.moved) {
@@ -333,19 +471,42 @@
 
     function select(id) {
         selected = id;
+        axisSel = false;
         renderSymbols();
         renderToolbar();
         if (mode === 'gear' && document.getElementById('pp-gear-list')) renderGearList();
     }
 
+    function turnIcon(d) {
+        return '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+    }
+    var TURN_LEFT = '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>', TURN_RIGHT = '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/>';
+
     function renderToolbar() {
         var p = selected ? find(selected) : null;
+        if (axisSel && axisOn()) {
+            toolbar.innerHTML = '<span class="pp-toolname">' + esc(T.plan.legend_axis) + '</span>' +
+                '<span class="pp-muted pp-small">' + esc(T.plan.axis_hint) + '</span><span style="flex:1"></span>' +
+                '<button type="button" class="pp-btn pp-btn--icon" data-axis-rot="-5" aria-label="' + esc(T.plan.rotate_left) + '" title="' + esc(T.plan.rotate_left) + '">' + turnIcon(TURN_LEFT) + '</button>' +
+                '<button type="button" class="pp-btn pp-btn--icon" data-axis-rot="5" aria-label="' + esc(T.plan.rotate_right) + '" title="' + esc(T.plan.rotate_right) + '">' + turnIcon(TURN_RIGHT) + '</button>' +
+                '<button type="button" class="pp-btn pp-btn--tight" data-axis-reset="1">' + esc(T.plan.axis_reset) + '</button>';
+            return;
+        }
         if (!p) {
             toolbar.innerHTML = '<span class="pp-muted pp-small">' + esc(T.plan.selected_none) + '</span>';
             return;
         }
         var h = '<span class="pp-toolname">' + esc(p.title) +
                 (p.provider ? ' <span class="pp-tag pp-tag--rented">' + esc(fmt(T.plan.rented, {name: p.provider})) + '</span>' : '') + '</span>';
+        if (p.role === 'camera') {
+            // Numbers 1 to 8 at least (a mixer's inputs); taking one that is in use swaps the two cameras.
+            var top = 8, cams = 0;
+            state.placements.forEach(function (q) { if (q.role === 'camera') { cams++; if (q.number > top) top = q.number; } });
+            h += '<label class="pp-toolask" for="pp-tool-num"><span>' + esc(T.plan.number) + '</span>' +
+                 '<select class="pp-input" id="pp-tool-num" data-number="1" style="min-width:76px;"><option value="">' + esc(T.plan.no_number) + '</option>';
+            for (var n = 1; n <= Math.max(top, cams); n++) h += '<option value="' + n + '"' + (p.number === n ? ' selected' : '') + '>' + n + '</option>';
+            h += '</select></label>';
+        }
         // Its lens is set right here, so there is no hunting for the camera in the checklist panel.
         var section = state.checklist.sections.find(function (s) { return s.item_id === p.item_id; });
         (section ? section.prompts : []).forEach(function (q) {
@@ -354,13 +515,10 @@
         });
         h += '<span style="flex:1"></span>';
         if (p.role === 'camera' || p.role === 'light') {
-            var icon = function (d) {
-                return '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
-            };
             h += '<button type="button" class="pp-btn pp-btn--icon" data-rot="-15" aria-label="' + esc(T.plan.rotate_left) + '" title="' + esc(T.plan.rotate_left) + '">' +
-                 icon('<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>') + '</button>' +
+                 turnIcon(TURN_LEFT) + '</button>' +
                  '<button type="button" class="pp-btn pp-btn--icon" data-rot="15" aria-label="' + esc(T.plan.rotate_right) + '" title="' + esc(T.plan.rotate_right) + '">' +
-                 icon('<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/>') + '</button>' +
+                 turnIcon(TURN_RIGHT) + '</button>' +
                  // The angle can be set by hand; Auto hands it back to the lens (or the standard beam).
                  '<span class="pp-stepper" role="group" aria-label="' + esc(T.plan.fov) + '" title="' + esc(T.plan.fov) + '">' +
                  '<button type="button" data-fov="-5" aria-label="' + esc(T.plan.narrower) + '">&minus;</button>' +
@@ -371,8 +529,15 @@
         h += '<button type="button" class="pp-btn pp-btn--danger pp-btn--tight" data-remove="1">' + esc(T.plan.remove) + '</button>';
         toolbar.innerHTML = h;
     }
-    toolbar.addEventListener('change', answerFrom);
+    toolbar.addEventListener('change', function (e) {
+        var num = e.target.closest('select[data-number]');
+        if (num && selected) { api('PATCH', URLS.placements + '/' + selected, {number: num.value === '' ? null : +num.value}); return; }
+        answerFrom(e);
+    });
     toolbar.addEventListener('click', function (e) {
+        var turn = e.target.closest('[data-axis-rot]');
+        if (turn && axisOn()) { turnAxis(+turn.getAttribute('data-axis-rot')); return; }
+        if (e.target.closest('[data-axis-reset]')) { api('PATCH', URLS.axis, {on: true, reset: true}); return; }
         var p = selected ? find(selected) : null;
         if (!p) return;
         var rot = e.target.closest('[data-rot]');
@@ -628,6 +793,14 @@
         renderSymbols();
     });
 
+    // The axis belongs to the plan, so showing it is saved with the project.
+    var axisBox = document.getElementById('pp-axis-on');
+    axisBox.addEventListener('change', function () {
+        axisSel = axisBox.checked;
+        if (axisSel) selected = null;
+        api('PATCH', URLS.axis, {on: axisBox.checked});
+    });
+
     var wrap = document.getElementById('pp-planwrap');
     // A sheet never hides the diagram: the page scrolls the diagram to the top
     // and the sheet takes only the room that is left under it.
@@ -656,7 +829,9 @@
         renderLive();
         renderZone();
         document.getElementById('pp-dock-count').textContent = state.checklist.total;
+        axisBox.checked = axisOn();
         renderSymbols();
+        renderWarn();
         renderToolbar();
         renderSide();
         renderPreview();

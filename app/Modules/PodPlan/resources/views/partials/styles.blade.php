@@ -13,7 +13,7 @@ body.ctx-podplan {
     --pp-sheet: rgba(255, 255, 255, .93); --pp-line: var(--stroke); --pp-line-2: rgba(20, 18, 35, .16);
     --pp-accent: var(--accent); --pp-accent-ink: #075985; --pp-accent-soft: var(--accent-soft);
     --pp-live: #b4500a; --pp-live-ink: #8f3f06; --pp-live-soft: rgba(180, 80, 10, .12);
-    --pp-ok: #0f8a5f; --pp-ok-soft: rgba(15, 138, 95, .14); --pp-bad: #b4232a; --pp-bad-soft: rgba(229, 72, 77, .12);
+    --pp-ok: #0f8a5f; --pp-ok-soft: rgba(15, 138, 95, .14); --pp-bad: #b4232a; --pp-bad-soft: rgba(229, 72, 77, .12); --pp-axis: #7c3aed;
     --pp-table: rgba(20, 18, 35, .07); --pp-lamp: #ffe9a8; --pp-box: #16151d; --pp-on-box: #ffffff;
 }
 :root[data-theme="dark"] body.ctx-podplan {
@@ -23,7 +23,7 @@ body.ctx-podplan {
     --pp-label: #9a98aa; --pp-surface: #14151b; --pp-ground: rgba(56, 189, 248, .07); --pp-canvas: rgba(255, 255, 255, .05);
     --pp-sheet: rgba(22, 24, 32, .95); --pp-line-2: rgba(255, 255, 255, .18); --pp-accent-ink: #bae6fd;
     --pp-live: #e8974c; --pp-live-ink: #f3b67c; --pp-live-soft: rgba(232, 151, 76, .16);
-    --pp-ok: #35d29a; --pp-ok-soft: rgba(53, 210, 154, .16); --pp-bad: #ff6369; --pp-bad-soft: rgba(255, 99, 105, .16);
+    --pp-ok: #35d29a; --pp-ok-soft: rgba(53, 210, 154, .16); --pp-bad: #ff6369; --pp-bad-soft: rgba(255, 99, 105, .16); --pp-axis: #b79cff;
     --pp-table: rgba(255, 255, 255, .08); --pp-lamp: #e9cf7a; --pp-box: #e8e8ee; --pp-on-box: #16151d;
 }
 body.ctx-podplan .content { padding-top: 28px; }
@@ -144,9 +144,12 @@ body.ctx-podplan .content { padding-top: 28px; }
     background-image: radial-gradient(var(--pp-line-2) 1px, transparent 1px); background-size: 20px 20px; }
 .pp-canvas [data-id] { cursor: grab; touch-action: none; }
 .pp-canvas [data-id].is-drag { cursor: grabbing; }
+.pp-canvas [data-axis] { cursor: grab; touch-action: none; }
 .pp-canvas text { font-family: var(--font); font-weight: 600; fill: var(--text); pointer-events: none;
     paint-order: stroke; stroke: var(--pp-surface); stroke-width: 3px; stroke-linejoin: round; }
 .pp-canvas text.sub { font-weight: 500; fill: var(--text-2); }
+.pp-canvas text.num { font-weight: 800; fill: var(--accent-ink); stroke: none; }
+.pp-canvas text.axis { font-weight: 800; fill: var(--pp-axis); }
 .pp-canvas text.zone { letter-spacing: .09em; fill: var(--pp-label); stroke: none; font-weight: 800; }
 .pp-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; min-height: 52px; padding: 8px 12px 8px 18px; border-radius: 26px; background: var(--panel); backdrop-filter: blur(var(--blur)) saturate(1.5); -webkit-backdrop-filter: blur(var(--blur)) saturate(1.5); border: 1px solid var(--panel-border); box-shadow: var(--shadow-sm); }
 .pp-toolbar .pp-btn { background: var(--field); border-color: var(--stroke); }

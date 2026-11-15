@@ -73,6 +73,25 @@ Lights turn and throw a beam too (a standard 60 degrees, and a new light is
 aimed at the table). `podplan_placements.fov` holds an angle set by hand for
 a camera or a light; `null` means automatic.
 
+## Camera numbers and the axis of action
+
+Every camera gets a `number` when it is placed (`PlanService::addGear`, the
+lowest number not in use on that plan). It is drawn on the camera body and
+changed from the toolbar; `setNumber()` keeps numbers unique by swapping when
+the number is taken. Numbers never reach the checklist. With a number on the
+body, the wireless mark is drawn as a badge on the camera's top-right corner.
+
+The axis of action (180° rule) is one line per project, stored as
+`podplan_projects.axis` = `{on, x1, y1, x2, y2}` in canvas units. Turning it on
+for the first time lays it through the first two people (`defaultAxis()`).
+`PATCH projects/{project}/axis` shows, hides, moves or resets it. While it is
+on, `PlanService::acrossTheAxis()` works out which side of the (infinite) line
+each camera's centre is on: the side with more cameras is the working side, a
+tie goes to the lowest-numbered camera, and the rest come back in the state
+with `across: true` plus a `plan_warnings` entry. On screen the line is drawn
+above the gear but grabbed from beneath it, so people and microphones sitting
+on the line stay easy to pick up; its end handles are on top.
+
 ## Checklist views
 
 Every section starts with a row for the gear itself (`self`, key

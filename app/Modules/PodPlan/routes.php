@@ -27,6 +27,7 @@ Route::post('projects/{project}/placements', [PlanController::class, 'add'])->na
 Route::patch('projects/{project}/placements/{placement}', [PlanController::class, 'move'])->name('plan.move');
 Route::delete('projects/{project}/placements/{placement}', [PlanController::class, 'remove'])->name('plan.remove');
 Route::patch('projects/{project}/live', [PlanController::class, 'live'])->name('plan.live');
+Route::patch('projects/{project}/axis', [PlanController::class, 'axis'])->name('plan.axis');
 Route::post('projects/{project}/answers', [PlanController::class, 'answer'])->name('plan.answer');
 Route::post('projects/{project}/describe', [PlanController::class, 'describe'])->name('plan.describe');
 Route::post('projects/{project}/describe/keep', [PlanController::class, 'keep'])->name('plan.keep');

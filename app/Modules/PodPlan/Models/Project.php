@@ -16,13 +16,14 @@ class Project extends Model
 
     protected $fillable = [
         'name', 'shoot_type', 'shoot_date', 'location', 'people_count',
-        'live_mixing', 'description', 'share_token', 'plan_undo', 'ai_result',
+        'live_mixing', 'axis', 'description', 'share_token', 'plan_undo', 'ai_result',
     ];
 
     protected $casts = [
         'shoot_date' => 'date',
         'live_mixing' => 'boolean',
         'people_count' => 'integer',
+        'axis' => 'array',
         'plan_undo' => 'array',
         'ai_result' => 'array',
     ];
